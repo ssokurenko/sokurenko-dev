@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Borel&display=swap');
+
+.site-title,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: 'Borel', cursive;
+}
+
+/* Borel's tall ascenders/descenders (e.g. the looped "k") get clipped by
+   Starlight's default `overflow: hidden` truncation on the site title. The
+   extra line-height gives the swashes room so the ancestor `.title-wrapper`
+   (which clips) doesn't cut them off either. Borel's baseline also sits
+   higher in its line box than the search bar's text, so nudge it down to
+   align optically with the search input. */
+.site-title span {
+	overflow: visible;
+	line-height: 1.4;
+	padding-block: 0.15em;
+	transform: translateY(0.45em);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	line-height: 1.4;
+}
+
+:root {
+	/* LinkedIn brand blues: https://www.designpieces.com/palette/linkedin-color-palette-hex-and-rgb/ */
+	--sl-color-accent-low: #004182; /* Congress Blue */
+	--sl-color-accent: #0a66c2; /* Science Blue */
+	--sl-color-accent-high: #dce6f1; /* Botticelli */
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: #dce6f1; /* Botticelli */
+	--sl-color-accent: #0a66c2; /* Science Blue */
+	--sl-color-accent-high: #004182; /* Congress Blue */
+}
+
+/* Frosted-glass nav bar instead of the default flat gray background. */
+header.header {
+	background-color: rgba(255, 255, 255, 0.6);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+}
