@@ -1,0 +1,121 @@
+---
+// PDF download bar, per specs/06-cheatsheet-page-template.md#pdf-download-bar
+// and specs/stories/epic-b-pdf.md#b7.
+//
+// Reads the manifest at runtime (not a static JSON import) so a missing
+// manifest in `astro dev` — which never builds PDFs — degrades to a
+// disabled state instead of failing the whole page.
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+
+const MANIFEST_PATH = path.resolve('src/generated/pdf-manifest.json');
+const manifest = existsSync(MANIFEST_PATH) ? JSON.parse(readFileSync(MANIFEST_PATH, 'utf8')) : {};
+const entry = manifest[slug] as
+  | { small: { path: string; bytes: number; pages: number }; large: { path: string; bytes: number; pages: number } }
+  | undefined;
+
+function formatSize(bytes: number): string {
+  return `${Math.round(bytes / 1024)} KB`;
+}
+
+const isProd = import.meta.env.PROD;
+
+// A sheet with pdf:true and no manifest entry in production is the exact
+// failure mode spec 03 says must fail the build — a stale/missing PDF
+// step should never ship silently.
+if (isProd && !entry) {
+  throw new Error(
+    `PDF manifest has no entry for "${slug}" — run \`npm run pdf:build\` before \`astro build\`.`,
+  );
+}
+---
+
+<div class="pdf-bar" data-pagefind-ignore>
+	{
+		entry ? (
+			<>
+				<a
+					class="pdf-button"
+					href={entry.small.path}
+					download={`${slug}-cheatsheet-kindle-small.pdf`}
+					type="application/pdf"
+					aria-label={`Download Kindle small PDF, ${entry.small.pages} pages, ${formatSize(entry.small.bytes)}`}
+				>
+					⬇ Kindle small (Paperwhite 6.8″) · {entry.small.pages}pp · {formatSize(entry.small.bytes)}
+				</a>
+				<a
+					class="pdf-button"
+					href={entry.large.path}
+					download={`${slug}-cheatsheet-kindle-large.pdf`}
+					type="application/pdf"
+					aria-label={`Download Kindle large PDF, ${entry.large.pages} pages, ${formatSize(entry.large.bytes)}`}
+				>
+					⬇ Kindle large (Scribe 10.2″) · {entry.large.pages}pp · {formatSize(entry.large.bytes)}
+				</a>
+				<a class="pdf-hint" href="https://www.amazon.com/sendtokindle" target="_blank" rel="noopener">
+					Send to Kindle →
+				</a>
+			</>
+		) : (
+			<span class="pdf-button pdf-button-disabled" aria-disabled="true">
+				PDF not built — run `npm run pdf:dev -- {slug}`
+			</span>
+		)
+	}
+</div>
+
+<style>
+	.pdf-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.6rem;
+		margin-block: 1rem 1.5rem;
+	}
+
+	.pdf-button {
+		font-size: 0.8rem;
+		padding: 0.45rem 0.8rem;
+		border-radius: 8px;
+		border: 1px solid var(--sl-color-accent);
+		color: var(--sl-color-accent);
+		text-decoration: none;
+		background: transparent;
+	}
+
+	.pdf-button:hover {
+		background: var(--sl-color-accent-low);
+	}
+
+	.pdf-button-disabled {
+		border-color: var(--sl-color-gray-5);
+		color: var(--sl-color-gray-4);
+		cursor: not-allowed;
+	}
+
+	.pdf-hint {
+		font-size: 0.8rem;
+		color: var(--sl-color-gray-2);
+	}
+
+	@media (max-width: 30rem) {
+		.pdf-bar {
+			flex-direction: column;
+			align-items: stretch;
+		}
+		.pdf-button {
+			text-align: center;
+		}
+	}
+
+	@media print {
+		.pdf-bar {
+			display: none;
+		}
+	}
+</style>

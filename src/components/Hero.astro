@@ -1,0 +1,9 @@
+---
+// Renders nothing. The presence of `hero:` frontmatter routes Starlight's
+// Page.astro into its single-ContentPanel branch (Hero + MarkdownContent
+// in one panel, instead of PageTitle-in-its-own-panel + a second panel),
+// which is what avoids both the duplicate "SokurenkoDEV" heading and the
+// `.content-panel + .content-panel { border-top }` divider line between
+// them. HomeHero.astro (rendered via the page's own content/slot) is our
+// real hero — Starlight's built-in Hero markup is unwanted here.
+---

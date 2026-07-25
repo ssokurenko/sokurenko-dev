@@ -1,0 +1,87 @@
+name: Re-verification check
+
+# Flags sheets nearing staleness (150 days) before the public "may be
+# stale" badge appears at 180 — specs/09-quality-bar.md#re-verification.
+# `lastVerified` itself is never auto-bumped by this or any workflow: it
+# is a human assertion that someone re-read the primary source.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # weekly, Monday 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  check-staleness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      - name: Find sheets past 150 days
+        id: find
+        run: |
+          cat > /tmp/find-stale.mjs <<'EOF'
+          import { readFileSync } from 'node:fs';
+          import fg from 'fast-glob';
+          import matter from 'gray-matter';
+
+          const THRESHOLD_DAYS = 150;
+          const files = await fg('src/content/docs/**/*.md');
+          const stale = [];
+
+          for (const file of files) {
+            const { data } = matter(readFileSync(file, 'utf8'));
+            const cs = data.cheatsheet;
+            if (!cs?.lastVerified) continue;
+            const ageDays = (Date.now() - new Date(cs.lastVerified).getTime()) / 86_400_000;
+            if (ageDays > THRESHOLD_DAYS) {
+              stale.push(`- \`${cs.slug}\` (${file}) — last verified ${Math.round(ageDays)} days ago`);
+            }
+          }
+
+          console.log(stale.length > 0 ? stale.join('\n') : '');
+          EOF
+          RESULT=$(node /tmp/find-stale.mjs)
+          echo "list<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$RESULT" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update tracking issue
+        if: steps.find.outputs.list != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `The following sheets are past 150 days since \`lastVerified\` and should be re-checked against their primary sources before the public staleness badge appears at 180 days:\n\n${{ steps.find.outputs.list }}\n\n\`lastVerified\` should only be updated after someone actually re-reads the primary source — never bump it just to silence this issue.`;
+            const title = 'Sheets due for re-verification';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['re-verification'],
+            });
+            const existing = issues.find((i) => i.title === title);
+            if (existing) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['re-verification'],
+              });
+            }

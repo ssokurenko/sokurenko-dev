@@ -1,0 +1,110 @@
+---
+// Adds the verification line and related-sheets cards above Starlight's
+// default footer (pagination, edit link), per
+// specs/06-cheatsheet-page-template.md#page-footer-additions.
+import Default from '@astrojs/starlight/components/Footer.astro';
+import { getEntry } from 'astro:content';
+
+const data = Astro.locals.starlightRoute.entry.data as any;
+const cs = data.cheatsheet as
+  | {
+      slug: string;
+      section: string;
+      verifiedAgainst: { label: string; url: string }[];
+      lastVerified: Date;
+      related?: string[];
+    }
+  | undefined;
+
+const canonicalUrl = cs ? `https://sokurenko.dev/${cs.section}/${cs.slug}/` : '';
+
+const relatedEntries = cs?.related
+  ? (
+      await Promise.all(
+        cs.related.map(async (id) => {
+          const entry = await getEntry('docs', id);
+          return entry ? { id, title: entry.data.title, description: entry.data.description } : null;
+        }),
+      )
+    ).filter((e): e is NonNullable<typeof e> => e !== null)
+  : [];
+
+const lastVerifiedDate = cs ? new Date(cs.lastVerified).toISOString().slice(0, 10) : '';
+---
+
+{
+	cs && (
+		<div class="verification-line" data-pagefind-ignore>
+			Verified {lastVerifiedDate} against{' '}
+			{cs.verifiedAgainst.map((source, i) => (
+				<>
+					{i > 0 && ', '}
+					<a href={source.url} rel="noopener">
+						{source.label}
+					</a>
+				</>
+			))}
+		</div>
+	)
+}
+
+{
+	cs && (
+		<p class="print-only-pdf-pointer">
+			A version typeset for e-ink is available at{' '}
+			<a class="print-pdf-pointer" href={canonicalUrl}>
+				{canonicalUrl}
+			</a>
+		</p>
+	)
+}
+
+{
+	relatedEntries.length > 0 && (
+		<nav class="related-sheets" aria-label="Related sheets" data-pagefind-ignore>
+			<span class="related-label">Related:</span>
+			{relatedEntries.map((entry, i) => (
+				<>
+					{i > 0 && <span aria-hidden="true"> · </span>}
+					<a href={`/${entry.id}/`}>{entry.title}</a>
+				</>
+			))}
+		</nav>
+	)
+}
+
+<Default><slot /></Default>
+
+<style>
+	.verification-line {
+		font-size: 0.85rem;
+		color: var(--sl-color-gray-2);
+		margin-block-start: 2rem;
+	}
+
+	.verification-line a {
+		color: var(--sl-color-gray-2);
+	}
+
+	.related-sheets {
+		font-size: 0.9rem;
+		margin-block-start: 0.75rem;
+	}
+
+	.related-label {
+		color: var(--sl-color-gray-3);
+		margin-inline-end: 0.4rem;
+	}
+
+	.print-only-pdf-pointer {
+		display: none;
+	}
+
+	@media print {
+		.print-only-pdf-pointer {
+			display: block;
+			font-size: 0.85rem;
+			margin-block-start: 1rem;
+		}
+	}
+</style>

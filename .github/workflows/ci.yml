@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TYPST_VERSION: '0.15.1'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Typst
+        run: |
+          curl -fsSL "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" \
+            | tar -xJ --strip-components=1 -C /usr/local/bin \
+              typst-x86_64-unknown-linux-musl/typst
+          typst --version
+
+      - name: Cache PDFs
+        uses: actions/cache@v4
+        with:
+          path: .pdf-cache
+          key: pdf-${{ env.TYPST_VERSION }}-${{ hashFiles('src/content/docs/**/*.md', 'typst/**') }}
+          restore-keys: pdf-${{ env.TYPST_VERSION }}-
+
+      - name: Lint content
+        run: npm run lint
+
+      - name: Type check
+        run: npm run check
+
+      - name: Unit + sample-compilation tests
+        run: npm run test
+
+      - name: Build PDFs
+        run: npm run pdf:build
+
+      - name: Validate PDFs
+        run: npm run pdf:verify
+
+      - name: Upload PDFs for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: cheat-sheet-pdfs
+          path: .pdf-cache/*.pdf
+          retention-days: 14
+
+      - name: Build site
+        run: npx astro build && npm run pdf:copy
+
+      - name: Internal link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --base dist
+            --no-progress
+            --exclude-mail
+            'dist/**/*.html'
+          fail: true
+
+  external-links:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: External link check (warn-only)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >
+            --no-progress
+            --exclude-mail
+            --exclude 'https://sokurenko\.dev.*'
+            'src/content/docs/**/*.md'
+          fail: false

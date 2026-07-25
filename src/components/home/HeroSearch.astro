@@ -1,0 +1,102 @@
+---
+// Search-first hero control per specs/04-front-page.md#2-hero-search.
+// It is a button, not a second input: clicking/focusing opens the same
+// dialog as the header's ⌘K search (specs/05-navigation-search.md). With
+// JS disabled it degrades to a real form GETing to /search/?q=.
+---
+
+<form action="/search/" method="get" class="hero-search" id="hero-search-form">
+	<span class="hero-search-icon" aria-hidden="true">⌕</span>
+	<input
+		type="search"
+		name="q"
+		id="hero-search-input"
+		class="hero-search-input"
+		placeholder="Search cheat sheets…"
+		autocomplete="off"
+		aria-label="Search cheat sheets"
+	/>
+	<kbd class="hero-search-kbd" id="hero-search-kbd" aria-hidden="true">⌘K</kbd>
+</form>
+
+<script>
+	const form = document.getElementById('hero-search-form') as HTMLFormElement | null;
+	const input = document.getElementById('hero-search-input') as HTMLInputElement | null;
+	const kbd = document.getElementById('hero-search-kbd');
+
+	if (kbd) {
+		// `navigator.platform` is deprecated; userAgent sniffing is the
+		// still-supported fallback for this cosmetic keyboard-hint choice.
+		const isMac = /mac/i.test(navigator.userAgent);
+		kbd.textContent = isMac ? '⌘K' : 'Ctrl K';
+	}
+
+	// Once JS is available, the hero field is just a trigger for the shared
+	// search dialog rather than a second, separately-indexed search.
+	function openSharedSearch(e: Event) {
+		const opener = (window as typeof window & { __openSearch?: () => void }).__openSearch;
+		if (opener) {
+			e.preventDefault();
+			opener();
+		}
+		// If the dialog hasn't hydrated yet, fall through to the real form
+		// submit — a live search is better than nothing.
+	}
+
+	input?.addEventListener('focus', openSharedSearch);
+	input?.addEventListener('click', openSharedSearch);
+	form?.addEventListener('submit', (e) => {
+		const opener = (window as typeof window & { __openSearch?: () => void }).__openSearch;
+		if (opener) {
+			e.preventDefault();
+			opener();
+		}
+	});
+</script>
+
+<style>
+	.hero-search {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		max-width: 34rem;
+		margin-inline: auto;
+		height: 3.5rem;
+		padding-inline: 1.25rem;
+		border-radius: 12px;
+		border: 1.5px solid var(--sl-color-accent);
+		background: var(--sl-color-bg-nav);
+	}
+
+	.hero-search:focus-within {
+		outline: 2px solid var(--sl-color-accent);
+		outline-offset: 2px;
+	}
+
+	.hero-search-icon {
+		font-size: 1.2rem;
+		color: var(--sl-color-gray-2);
+	}
+
+	.hero-search-input {
+		flex: 1;
+		border: none;
+		background: transparent;
+		font-size: 1rem;
+		color: var(--sl-color-white);
+		outline: none;
+	}
+
+	.hero-search-input::placeholder {
+		color: var(--sl-color-gray-3);
+	}
+
+	.hero-search-kbd {
+		font-size: 0.75rem;
+		padding: 0.2rem 0.5rem;
+		border-radius: 6px;
+		border: 1px solid var(--sl-color-gray-5);
+		color: var(--sl-color-gray-2);
+		font-family: inherit;
+	}
+</style>

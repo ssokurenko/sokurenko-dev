@@ -2,16 +2,51 @@
   "name": "sokurenko-dev",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "dev": "astro dev",
+    "dev:stop": "astro dev stop",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "npm run lint && npm run pdf:build && astro build && npm run pdf:copy",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "tsx scripts/lint-cheatsheets.ts",
+    "lint:fix": "tsx scripts/lint-cheatsheets.ts --fix",
+    "pdf:build": "tsx scripts/pdf/build-pdfs.ts",
+    "pdf:copy": "tsx scripts/pdf/copy-to-dist.ts",
+    "pdf:dev": "tsx scripts/pdf/build-pdfs.ts --dev --out public/pdf",
+    "pdf:verify": "tsx scripts/pdf/verify-pdfs.ts",
+    "verify:samples": "tsx scripts/verify-samples.ts",
+    "check": "astro check && tsc --noEmit",
+    "test": "vitest run",
+    "verify": "npm run lint && npm run check && npm run test && npm run pdf:verify"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",
     "astro": "^7.0.2",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/pngjs": "^6.0.5",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
+    "hast-util-to-string": "^3.0.1",
+    "jsqr": "^1.4.0",
+    "mdast-util-to-string": "^4.0.0",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5",
+    "pngjs": "^7.0.0",
+    "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3",
+    "unist-util-visit": "^5.1.0",
+    "vitest": "^4.1.10"
   }
 }

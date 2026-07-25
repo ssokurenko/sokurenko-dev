@@ -19,3 +19,14 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# generated PDF build artifacts
+.pdf-cache/
+src/generated/
+public/pdf/
+
+# generated TypeScript sample-verification artifacts
+.ts-sample-cache/
+
+# dev specs
+specs/

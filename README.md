@@ -1,49 +1,30 @@
-# Starlight Starter Kit: Basics
+# sokurenko.dev
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+A web-development cheat-sheet reference catalog. Each sheet is one Markdown
+file that renders to an HTML page and two Kindle-tuned PDFs — one source,
+zero divergence.
 
-```
-npm create astro@latest -- --template starlight
-```
+Built with [Astro](https://astro.build) + [Starlight](https://starlight.astro.build).
+PDFs are typeset with [Typst](https://typst.app).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Documentation
 
-## 🚀 Project Structure
+Start with [`AGENTS.md`](AGENTS.md), then [`specs/`](specs/README.md) —
+the specs are authoritative for anything non-trivial.
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## Commands
 
-```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
-```
+| Command | Action |
+| --- | --- |
+| `npm install` | Install dependencies |
+| `npm run dev` | Start the dev server at `localhost:4321` (no PDFs) |
+| `npm run pdf:dev -- <slug>` | Build one sheet's PDFs into `public/pdf/` |
+| `npm run lint` | Run the content linter |
+| `npm run verify` | Everything CI runs (lint, types, tests, PDF validation) |
+| `npm run build` | Full production build: lint → PDFs → site → copy PDFs |
+| `npm run preview` | Preview the production build locally |
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+## Requirements
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
-
-Static assets, like favicons, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+- Node (see `.nvmrc`)
+- [Typst](https://typst.app) — `brew install typst`, needed for `npm run build`

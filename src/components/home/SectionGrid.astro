@@ -1,0 +1,101 @@
+---
+// Section cards, generated from the taxonomy + live sheet counts.
+// Sections with zero sheets are hidden per specs/04-front-page.md#4-section-grid —
+// eight empty cards would advertise emptiness rather than hide it.
+import { getCollection } from 'astro:content';
+import { SECTIONS } from '../../config/taxonomy';
+
+const entries = await getCollection('docs');
+
+const sections = SECTIONS.map((section) => {
+	const count = entries.filter(
+		(e) => e.id.startsWith(`${section.slug}/`) && e.id !== `${section.slug}/index`,
+	).length;
+	return { ...section, count };
+}).filter((section) => section.count > 0);
+---
+
+{
+	sections.length > 0 && (
+		<section aria-labelledby="browse-heading" class="section-grid-wrap">
+			<h2 id="browse-heading">Browse by section</h2>
+			<div class="section-grid">
+				{sections.map((section) => (
+					<a
+						href={`/${section.slug}/`}
+						class="section-card"
+						aria-label={`${section.label}, ${section.count} sheet${section.count === 1 ? '' : 's'}`}
+					>
+						<span class="section-card-label">{section.label}</span>
+						<span class="section-card-count">
+							{section.count} sheet{section.count === 1 ? '' : 's'}
+						</span>
+						<span class="section-card-blurb">{section.blurb}</span>
+					</a>
+				))}
+			</div>
+		</section>
+	)
+}
+
+<style>
+	.section-grid-wrap {
+		max-width: var(--sl-content-width);
+		margin-inline: auto;
+		padding-inline: 1.5rem;
+		margin-block-start: 3rem;
+	}
+
+	#browse-heading {
+		font-size: 1.1rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--sl-color-gray-2);
+		margin-block-end: 1rem;
+	}
+
+	.section-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+		gap: 1rem;
+	}
+
+	.section-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		padding: 1.25rem;
+		border-radius: 12px;
+		border: 1px solid var(--sl-color-gray-5);
+		background: var(--sl-color-bg-nav);
+		text-decoration: none;
+		color: inherit;
+		transition: transform 150ms ease-out, border-color 150ms ease-out;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.section-card:hover,
+		.section-card:focus-visible {
+			transform: translateY(-2px);
+			border-color: var(--sl-color-accent);
+		}
+	}
+
+	.section-card-label {
+		font-weight: 600;
+		font-size: 1.35rem;
+		color: var(--sl-color-white);
+	}
+
+	.section-card-count {
+		font-size: 0.8rem;
+		color: var(--sl-color-accent);
+		font-weight: 600;
+	}
+
+	.section-card-blurb {
+		font-size: 0.85rem;
+		color: var(--sl-color-gray-2);
+		line-height: 1.4;
+	}
+</style>

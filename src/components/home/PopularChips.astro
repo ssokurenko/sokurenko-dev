@@ -1,0 +1,41 @@
+---
+import { POPULAR } from '../../config/popular';
+---
+
+{
+	POPULAR.length > 0 && (
+		<div class="popular-chips">
+			{POPULAR.map((item, i) => (
+				<>
+					{i > 0 && <span class="chip-sep" aria-hidden="true">·</span>}
+					<a href={item.href} class="chip">{item.label}</a>
+				</>
+			))}
+		</div>
+	)
+}
+
+<style>
+	.popular-chips {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.4rem;
+		margin-block-start: 1rem;
+		font-size: 0.9rem;
+	}
+
+	.chip {
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+	}
+
+	.chip:hover,
+	.chip:focus-visible {
+		color: var(--sl-color-accent);
+	}
+
+	.chip-sep {
+		color: var(--sl-color-gray-4);
+	}
+</style>

@@ -1,0 +1,32 @@
+---
+// Wraps Starlight's default search (⌘K dialog + Pagefind UI) rather than
+// reimplementing it, per specs/05-navigation-search.md#component-override.
+// Adds a `/` shortcut and exposes `window.__openSearch()` so the front
+// page's hero search control (specs/04) can trigger the same dialog
+// instead of running a second, separately-indexed search.
+import Default from '@astrojs/starlight/components/Search.astro';
+---
+
+<Default><slot /></Default>
+
+<script>
+	function openSearch() {
+		const openBtn = document.querySelector<HTMLButtonElement>('site-search button[data-open-modal]');
+		openBtn?.click();
+	}
+
+	(window as typeof window & { __openSearch?: () => void }).__openSearch = openSearch;
+
+	window.addEventListener('keydown', (e) => {
+		if (e.key !== '/') return;
+		const target = e.target as HTMLElement | null;
+		const isEditable =
+			target &&
+			(target.tagName === 'INPUT' ||
+				target.tagName === 'TEXTAREA' ||
+				target.isContentEditable);
+		if (isEditable) return;
+		e.preventDefault();
+		openSearch();
+	});
+</script>

@@ -1,0 +1,121 @@
+---
+// Generated section-index card grid, per
+// specs/01-information-architecture.md#section-index-pages. Not
+// hand-written prose — cards are computed from the collection so a new
+// sheet appears here automatically.
+import { getCollection } from 'astro:content';
+import { getSection } from '../config/taxonomy';
+import { isStale } from '../config/cheatsheet-schema';
+
+interface Props {
+	section: string;
+}
+const { section } = Astro.props;
+const taxonomySection = getSection(section);
+
+const entries = await getCollection('docs', (e) => {
+	return e.id.startsWith(`${section}/`) && e.id !== `${section}/index` && e.data.cheatsheet;
+});
+
+const sheets = entries
+	.map((e) => ({
+		id: e.id,
+		title: e.data.title,
+		summary: e.data.cheatsheet!.summary,
+		difficulty: e.data.cheatsheet!.difficulty,
+		topicVersion: e.data.cheatsheet!.topicVersion,
+		stale: isStale(new Date(e.data.cheatsheet!.lastVerified)),
+	}))
+	.sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<p class="section-blurb">{taxonomySection?.blurb}</p>
+
+{
+	sheets.length === 0 ? (
+		<p>No sheets published in this section yet.</p>
+	) : (
+		<div class="sheet-grid">
+			{sheets.map((sheet) => (
+				<a href={`/${sheet.id}/`} class="sheet-card">
+					<div class="sheet-card-head">
+						<span class="sheet-card-title">{sheet.title}</span>
+						<span class="sheet-card-version">v{sheet.topicVersion}</span>
+					</div>
+					<p class="sheet-card-summary">{sheet.summary}</p>
+					<div class="sheet-card-meta">
+						<span class={`difficulty difficulty-${sheet.difficulty}`}>{sheet.difficulty}</span>
+						{sheet.stale && <span class="stale-dot" title="May be stale">⚠</span>}
+					</div>
+				</a>
+			))}
+		</div>
+	)
+}
+
+<style>
+	.section-blurb {
+		color: var(--sl-color-gray-2);
+		max-width: 60ch;
+	}
+
+	.sheet-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: 1rem;
+		margin-block-start: 1.5rem;
+	}
+
+	.sheet-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding: 1rem 1.1rem;
+		border-radius: 10px;
+		border: 1px solid var(--sl-color-gray-5);
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.sheet-card:hover,
+	.sheet-card:focus-visible {
+		border-color: var(--sl-color-accent);
+	}
+
+	.sheet-card-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.5rem;
+	}
+
+	.sheet-card-title {
+		font-weight: 600;
+		color: var(--sl-color-white);
+	}
+
+	.sheet-card-version {
+		font-size: 0.7rem;
+		color: var(--sl-color-accent);
+	}
+
+	.sheet-card-summary {
+		font-size: 0.85rem;
+		color: var(--sl-color-gray-2);
+		margin: 0;
+	}
+
+	.sheet-card-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-block-start: 0.2rem;
+	}
+
+	.difficulty {
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--sl-color-gray-3);
+	}
+</style>

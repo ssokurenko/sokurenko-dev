@@ -1,0 +1,128 @@
+---
+// The Kindle differentiator gets real space on the front page, per
+// specs/04-front-page.md#5-kindle-band.
+//
+// v1 note: the spec calls for this preview to be generated from the real
+// PDF at build time (render page 3 to PNG) so it can never misrepresent
+// the output. That requires a PDF-rasterization step that doesn't exist
+// yet — tracked as a follow-up to story C1. This CSS-drawn mockup uses
+// real content from the shipped TypeScript sheet's "At a glance" table,
+// so it is representative rather than a stock illustration, but it is not
+// pixel-identical to the compiled PDF.
+---
+
+<section class="kindle-band" aria-labelledby="kindle-heading">
+	<div class="kindle-band-inner">
+		<div class="kindle-copy">
+			<h2 id="kindle-heading">Read it on your Kindle</h2>
+			<p>
+				Every sheet is typeset for e-ink in two sizes — Paperwhite and
+				Scribe. Not a shrunken A4 PDF: real margins, grayscale-safe
+				code highlighting, and type sized for a 300ppi panel.
+			</p>
+			<a href="/languages/typescript/" class="kindle-cta">Browse sheets →</a>
+		</div>
+		<div class="kindle-frame" aria-hidden="true">
+			<div class="kindle-screen">
+				<p class="kindle-title">TypeScript</p>
+				<div class="kindle-rule"></div>
+				<table class="kindle-table">
+					<tr><td><code>as const</code></td><td>literal, readonly</td></tr>
+					<tr><td><code>satisfies T</code></td><td>check, keep type</td></tr>
+					<tr><td><code>keyof T</code></td><td>union of keys</td></tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.kindle-band {
+		background: var(--sl-color-accent-low);
+		margin-block-start: 3rem;
+		padding-block: 3rem;
+	}
+
+	.kindle-band-inner {
+		max-width: var(--sl-content-width);
+		margin-inline: auto;
+		padding-inline: 1.5rem;
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: 2rem;
+		align-items: center;
+	}
+
+	@media (min-width: 50rem) {
+		.kindle-band-inner {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	.kindle-copy h2 {
+		margin-block-start: 0;
+	}
+
+	.kindle-copy p {
+		color: var(--sl-color-gray-2);
+		max-width: 32rem;
+	}
+
+	.kindle-cta {
+		display: inline-block;
+		color: var(--sl-color-accent);
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.kindle-cta:hover {
+		text-decoration: underline;
+	}
+
+	.kindle-frame {
+		justify-self: center;
+		width: 14rem;
+		padding: 0.9rem;
+		border-radius: 1.1rem;
+		background: #2a2a2a;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+	}
+
+	.kindle-screen {
+		background: #f4f4f2;
+		border-radius: 0.3rem;
+		padding: 1rem 0.9rem;
+		aspect-ratio: 3 / 4;
+		color: #1a1a1a;
+	}
+
+	.kindle-title {
+		font-weight: 600;
+		font-size: 1.1rem;
+		margin: 0 0 0.4rem;
+	}
+
+	.kindle-rule {
+		height: 1px;
+		background: #ccc;
+		margin-block-end: 0.6rem;
+	}
+
+	.kindle-table {
+		width: 100%;
+		font-size: 0.6rem;
+		border-collapse: collapse;
+	}
+
+	.kindle-table td {
+		padding: 0.25rem 0;
+		border-bottom: 1px solid #ddd;
+		vertical-align: top;
+	}
+
+	.kindle-table td:first-child {
+		font-family: ui-monospace, monospace;
+		padding-right: 0.5rem;
+		white-space: nowrap;
+	}
+</style>
