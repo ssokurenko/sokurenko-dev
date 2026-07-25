@@ -6,29 +6,28 @@ Work top to bottom. Do not set `lastVerified` until everything above it passes.
 
 - [ ] The sheet covers exactly one topic
 - [ ] Out-of-scope areas were consciously decided and belong to other sheets
-- [ ] Topic is broad enough to yield 10+ "At a glance" rows
-- [ ] Topic is narrow enough to stay under ~1,200 words
+- [ ] Topics are sequenced so each one only depends on concepts already covered above it
+- [ ] Topic is narrow enough to stay under ~800 words
 
 ## 2. Structure
 
-- [ ] `## At a glance` is the first section
-- [ ] `## Mental model` is the second section, with no code
-- [ ] 4–10 topic sections
-- [ ] `## Common errors` present if the topic has canonical errors
+- [ ] `## Mental model` is the first section — 2–4 sentences, no code, no table
+- [ ] 4–9 topic sections, ordered simple → complex
+- [ ] No single "At a glance" mega-table anywhere — lookup lives inside each section instead
+- [ ] No separate "Common errors" section — error codes are folded into the section that causes them
 - [ ] `## Further reading` is the last section
 - [ ] No heading deeper than `###`
 - [ ] Every topic section has at least one code sample
-- [ ] Every topic section has at least one callout, preferably a real gotcha
+- [ ] No section has more than one callout
 
-## 3. "At a glance"
+## 3. Per-section quick-ref tables
 
-- [ ] 10–20 rows
+- [ ] Each topic section's table covers only that section's concept, not the whole sheet
+- [ ] 2–6 rows per table
 - [ ] 2–3 columns; column 1 is what the reader would type
-- [ ] Ordered by frequency of need, not alphabetically
-- [ ] Every row self-contained — no forward references
-- [ ] Every row maps to a topic section below
-- [ ] Answers the ten most common questions on the topic
-- [ ] Someone could answer a real question from this table alone
+- [ ] Table comes immediately after the heading, before the prose
+- [ ] Ordered by frequency of need within that concept
+- [ ] Self-contained — no forward references to a later section
 
 ## 4. Code
 
@@ -46,7 +45,7 @@ Work top to bottom. Do not set `lastVerified` until everything above it passes.
 - [ ] `verifiedAgainst` lists those sources
 - [ ] `topicVersion` matches the version documented
 - [ ] Version-gated claims confirmed against release notes
-- [ ] Every error code reproduced and confirmed
+- [ ] Every error code folded into a section reproduces the described error, with the exact trigger given
 - [ ] Nothing copied from another cheat sheet
 - [ ] No claim resting only on recall
 
@@ -70,7 +69,7 @@ Work top to bottom. Do not set `lastVerified` until everything above it passes.
 ## 8. Format contract
 
 - [ ] No forbidden constructs (H1, `####`, images, HTML, MDX, footnotes, emoji semantics)
-- [ ] No table over 3 columns
+- [ ] No table over 3 columns or 6 rows
 - [ ] Lists nested at most one level
 - [ ] No bare URLs in prose
 - [ ] Only the four recognized callout labels
@@ -91,7 +90,7 @@ Work top to bottom. Do not set `lastVerified` until everything above it passes.
 ```bash
 npm run lint              # zero errors AND zero warnings
 npm run pdf:dev -- <slug>
-npm run test              # sample compilation, where a harness exists
+npm run verify:samples    # sample compilation, where a harness exists
 ```
 
 - [ ] `npm run lint` clean
@@ -105,7 +104,7 @@ Open **both** PDFs. The small one is where problems show.
 - [ ] No code clipped at the right edge
 - [ ] No `↪` wrap markers (they mean a line slipped past the linter)
 - [ ] No heading orphaned at the foot of a page
-- [ ] Tables read correctly across page breaks; headers repeat
+- [ ] Each small per-section table reads correctly on its own page — it should never need to break across a page
 - [ ] No callout split across pages
 - [ ] Code comfortably legible, not merely present
 - [ ] Contents page links work
@@ -119,7 +118,6 @@ Open **both** PDFs. The small one is where problems show.
 - [ ] Renders correctly in light and dark themes
 - [ ] Readable at 320 px viewport width
 - [ ] Copy buttons work on every code block
-- [ ] "At a glance" deep-links resolve to the right sections
 - [ ] Download bar shows correct page counts and file sizes
 - [ ] Canonical URL matches the PDF footer character for character
 - [ ] Lighthouse ≥ 95 in all categories

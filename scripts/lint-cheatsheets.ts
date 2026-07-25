@@ -25,8 +25,7 @@ import {
   MAX_TABLE_COLUMNS,
   MAX_HEADING_DEPTH,
   MAX_LIST_NESTING,
-  MIN_AT_A_GLANCE_ROWS,
-  MAX_AT_A_GLANCE_ROWS,
+  WARN_SECTION_TABLE_ROWS,
   MIN_TOPIC_SECTIONS,
   MAX_TOPIC_SECTIONS,
   WARN_WORD_COUNT,
@@ -241,6 +240,15 @@ function lintFile(file: string, sheets: SheetInfo[]) {
         if (columns > MAX_TABLE_COLUMNS) {
           report(file, node, 'error', 'table-columns', `table has ${columns} columns, exceeding the max of ${MAX_TABLE_COLUMNS}`);
         }
+        // Every table is a per-section quick-ref now (no single "at a
+        // glance" mega-table) — a table this big signals the section is
+        // covering too much and should split. Warning, not an error:
+        // some legitimate references (utility types, tsconfig flags)
+        // reasonably run a bit longer.
+        const rows = Math.max(0, node.children.length - 1);
+        if (rows > WARN_SECTION_TABLE_ROWS) {
+          report(file, node, 'warning', 'table-rows', `table has ${rows} rows, exceeding the ${WARN_SECTION_TABLE_ROWS}-row quick-ref guideline — consider splitting the section`);
+        }
         break;
       }
       case 'link': {
@@ -278,54 +286,31 @@ function lintFile(file: string, sheets: SheetInfo[]) {
 
   if (isSheet) {
     const firstH2 = h2Headings[0]?.text;
-    const secondH2 = h2Headings[1]?.text;
     const lastH2 = h2Headings[h2Headings.length - 1]?.text;
 
-    if (firstH2 !== 'At a glance') {
-      report(file, h2Headings[0]?.node, 'error', 'section-order', '`## At a glance` must be the first section');
-    }
-    if (secondH2 !== 'Mental model') {
-      report(file, h2Headings[1]?.node, 'error', 'section-order', '`## Mental model` must be the second section');
+    // Structure per specs/02-content-format.md#structure: a short
+    // `## Mental model` orients the reader, topic sections run simple
+    // to complex (no fixed labels, no single "at a glance" mega-table —
+    // each topic carries its own small quick-ref table), and
+    // `## Further reading` closes it out. There is no mandated
+    // "Common errors" section — error codes are folded into whichever
+    // topic section they belong to, as callouts.
+    if (firstH2 !== 'Mental model') {
+      report(file, h2Headings[0]?.node, 'error', 'section-order', '`## Mental model` must be the first section');
     }
     if (lastH2 !== 'Further reading') {
       report(file, h2Headings[h2Headings.length - 1]?.node, 'error', 'section-order', '`## Further reading` must be the last section');
     }
 
-    const topicCount = h2Headings.filter(
-      (h) => !['At a glance', 'Mental model', 'Further reading', 'Common errors'].includes(h.text),
-    ).length;
+    const topicCount = h2Headings.filter((h) => !['Mental model', 'Further reading'].includes(h.text)).length;
     if (topicCount < MIN_TOPIC_SECTIONS || topicCount > MAX_TOPIC_SECTIONS) {
       report(file, undefined, 'warning', 'topic-count', `${topicCount} topic sections; expected ${MIN_TOPIC_SECTIONS}-${MAX_TOPIC_SECTIONS}`);
-    }
-
-    // "At a glance" row count: find the table immediately following the
-    // heading (before the next heading).
-    const atAGlanceIdx = h2Headings.findIndex((h) => h.text === 'At a glance');
-    if (atAGlanceIdx !== -1) {
-      const rows = countRowsAfterHeading(tree, h2Headings[atAGlanceIdx].node);
-      if (rows !== null && (rows < MIN_AT_A_GLANCE_ROWS || rows > MAX_AT_A_GLANCE_ROWS)) {
-        report(file, h2Headings[atAGlanceIdx].node, 'error', 'at-a-glance-rows', `"At a glance" has ${rows} rows; expected ${MIN_AT_A_GLANCE_ROWS}-${MAX_AT_A_GLANCE_ROWS}`);
-      }
     }
 
     if (wordCount > WARN_WORD_COUNT) {
       report(file, undefined, 'warning', 'word-count', `sheet is ${wordCount} words, exceeding the ${WARN_WORD_COUNT}-word guideline`);
     }
   }
-}
-
-function countRowsAfterHeading(tree: any, headingNode: any): number | null {
-  const siblings: any[] = tree.children;
-  const idx = siblings.indexOf(headingNode);
-  if (idx === -1) return null;
-  for (let i = idx + 1; i < siblings.length; i++) {
-    const node = siblings[i];
-    if (node.type === 'heading') return null;
-    if (node.type === 'table') {
-      return Math.max(0, node.children.length - 1); // minus header row
-    }
-  }
-  return null;
 }
 
 main();

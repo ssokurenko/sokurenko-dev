@@ -13,7 +13,7 @@ The complete constrained-Markdown vocabulary. Authoritative source: `specs/02-co
 | Italic | `_text_` | |
 | Inline code | `` `code` `` | |
 | Fenced code | ```` ```ts ```` | Language tag required; ≤ 15 lines; lines ≤ 52 chars |
-| Table | GFM pipe table | ≤ 3 columns; header row required |
+| Table | GFM pipe table | ≤ 3 columns, 2–6 rows; header row required |
 | Unordered list | `- item` | ≤ 1 nesting level |
 | Ordered list | `1. item` | ≤ 1 nesting level |
 | Link | `[text](url)` | Descriptive text, never "here" |
@@ -29,7 +29,7 @@ The complete constrained-Markdown vocabulary. Authoritative source: `specs/02-co
 | MDX / JSX components | Typst cannot render JSX — the PDF silently loses the content | An allowed construct, or a Starlight component override |
 | Images, diagrams, screenshots | Illegible at 4.12″ grayscale; unsearchable; uncopyable; inaccessible | A table or a code block |
 | Raw HTML | Bypasses the linter and breaks Typst | An allowed construct |
-| Tables > 3 columns | Overflows the 253 pt small-format text block | Split into two tables, or a definition-style list |
+| Tables > 3 columns, or > 6 rows | Overflows the 253 pt small-format text block; a table this big isn't a "glance" anymore | Split into two tables, or a definition-style list |
 | Nested tables | No reliable Typst mapping | Restructure |
 | Tables inside lists | No reliable Typst mapping | Lift the table out |
 | Footnotes | Poor e-ink UX — no back-navigation from the note | Inline parenthetical, or a callout |
@@ -63,14 +63,12 @@ If you're unsure between Gotcha and Warning: does it cost time (Gotcha) or cause
 ## Required section order
 
 ```
-## At a glance      FIRST, mandatory
-## Mental model     SECOND, mandatory
-## <topics>         4–10 sections
-## Common errors    where canonical errors exist
+## Mental model     FIRST, mandatory — 2-4 sentences, no code, no table
+## <topics>         4–9 sections, ordered simple → complex
 ## Further reading  LAST, mandatory
 ```
 
-The linter enforces first/last position and the presence of all three mandatory sections.
+There is no "At a glance" mega-table and no separate "Common errors" section. Every topic section carries its own small quick-ref table (2–6 rows); error codes are folded in as a callout inside whichever section causes them. The linter enforces first/last position and the presence of both mandatory sections.
 
 ## Numeric limits
 
@@ -80,11 +78,11 @@ The linter enforces first/last position and the presence of all three mandatory 
 | Code line length | 48 chars | warning |
 | Code block length | 15 lines | error |
 | Table columns | 3 | error |
+| Table rows | 6 | warning |
 | Heading depth | `###` | error |
 | List nesting | 1 level | error |
-| "At a glance" rows | 10–20 | error |
-| Topic sections | 4–10 | warning |
-| Total words | 1,200 | warning |
+| Topic sections | 4–9 | warning |
+| Total words | 800 | warning |
 | `lastVerified` age | 180 days | warning |
 | `summary` length | 160 chars | error |
 
@@ -98,21 +96,20 @@ All fail the build:
 2. Code line > 52 chars
 3. Code fence without a language tag
 4. Table with > 3 columns
-5. Missing required section, or wrong first/last position
-6. "At a glance" outside 10–20 rows
-7. Frontmatter fails the Zod schema
-8. Duplicate `cheatsheet.slug`
-9. Dangling `related` reference
-10. Bare URL in prose
-11. Code block > 15 lines
-12. Unrecognized callout label
+5. Missing required section, or `Mental model`/`Further reading` not first/last
+6. Frontmatter fails the Zod schema
+7. Duplicate `cheatsheet.slug`
+8. Dangling `related` reference
+9. Bare URL in prose
+10. Code block > 15 lines
+11. Unrecognized callout label
 
 ## Linter warnings
 
 1. Code line 48–52 chars
-2. `lastVerified` > 180 days ago
-3. Sheet > 1,200 words
-4. Topic section with no code sample
-5. "At a glance" row key that doesn't resolve to a heading (breaks deep-linking)
+2. Table > 6 rows — split the section, it's covering too much for a "glance"
+3. `lastVerified` > 180 days ago
+4. Sheet > 800 words
+5. Fewer than 4 or more than 9 topic sections
 
 Ship with zero errors **and** zero warnings.

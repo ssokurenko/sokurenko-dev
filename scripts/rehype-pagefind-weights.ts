@@ -16,10 +16,13 @@ import { SYMBOL_ALIASES } from '../src/config/symbol-aliases.ts';
 
 type HastNode = any;
 
-const ZONE_WEIGHTS: Record<string, string> = {
-  'at-a-glance': '10',
-  'common-errors': '8',
-};
+// Every topic section carries its own small quick-ref table now (no
+// single "at a glance" mega-table to special-case) — so every table
+// gets the same high weight, since each one is the fast-answer content
+// for its section.
+const TABLE_WEIGHT = '8';
+const HEADING_WEIGHT = '5';
+const INLINE_CODE_WEIGHT = '4';
 
 export function rehypePagefindWeights() {
   return (tree: HastNode, file: any) => {
@@ -28,20 +31,15 @@ export function rehypePagefindWeights() {
       | undefined;
     const cs = frontmatter?.cheatsheet;
 
-    let zone = 'other';
     let metaAttached = false;
 
     for (const node of tree.children as HastNode[]) {
       if (node.type !== 'element') continue;
 
       if (node.tagName === 'h2' || node.tagName === 'h3') {
-        const text = hastToString(node).trim();
-        if (node.tagName === 'h2') {
-          zone = text === 'At a glance' ? 'at-a-glance' : text === 'Common errors' ? 'common-errors' : 'other';
-        }
-        setProp(node, 'dataPagefindWeight', '5');
-      } else if (node.tagName === 'table' && ZONE_WEIGHTS[zone]) {
-        setProp(node, 'dataPagefindWeight', ZONE_WEIGHTS[zone]);
+        setProp(node, 'dataPagefindWeight', HEADING_WEIGHT);
+      } else if (node.tagName === 'table') {
+        setProp(node, 'dataPagefindWeight', TABLE_WEIGHT);
       }
 
       // Attach section/difficulty/tag metadata + filters once, on the
@@ -59,7 +57,7 @@ export function rehypePagefindWeights() {
 
       visit(node, 'element', (codeNode: HastNode, index, parent) => {
         if (codeNode.tagName !== 'code') return;
-        setProp(codeNode, 'dataPagefindWeight', '4');
+        setProp(codeNode, 'dataPagefindWeight', INLINE_CODE_WEIGHT);
 
         const text = hastToString(codeNode).trim();
         const alias = SYMBOL_ALIASES[text];

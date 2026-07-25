@@ -34,7 +34,7 @@ cheatsheet:
 ---
 `;
 
-function atAGlanceTable(rows: number): string {
+function quickRefTable(rows: number): string {
   const header = '| Key | Value |\n|---|---|\n';
   const body = Array.from({ length: rows }, (_, i) => `| \`k${i}\` | v${i} |`).join('\n');
   return header + body;
@@ -57,16 +57,14 @@ describe('lint-cheatsheets', () => {
     writeFileSync(
       path.join(dir, 'widgets.md'),
       `${VALID_FRONTMATTER}
-## At a glance
-
-${atAGlanceTable(12)}
-
 ## Mental model
 
 Widgets are simple. This paragraph explains the mental model without
 any code, as required.
 
 ## Basics
+
+${quickRefTable(3)}
 
 Some prose about widgets.
 
@@ -75,6 +73,12 @@ const w = createWidget();
 \`\`\`
 
 > **Gotcha:** Widgets are zero-indexed.
+
+## Intermediate
+
+${quickRefTable(2)}
+
+More prose, building on the basics above.
 
 ## Further reading
 
@@ -95,10 +99,6 @@ const w = createWidget();
       `${VALID_FRONTMATTER.replace('slug: widgets', 'slug: broken')}
 # A forbidden H1
 
-## At a glance
-
-${atAGlanceTable(2)}
-
 ## Not mental model first
 
 \`\`\`
@@ -108,6 +108,8 @@ const line = "this line is deliberately way way way too long to fit";
 | A | B | C | D |
 |---|---|---|---|
 | 1 | 2 | 3 | 4 |
+
+${quickRefTable(9)}
 
 > **NotARealLabel:** this callout label is invalid
 
@@ -121,8 +123,8 @@ Visit https://example.com/bare for more.
 
     expect(exitCode).toBe(1);
     expect(rules).toContain('forbidden-h1');
-    expect(rules).toContain('section-order'); // Mental model not second
-    expect(rules).toContain('at-a-glance-rows'); // only 2 rows
+    expect(rules).toContain('section-order'); // Mental model not first
+    expect(rules).toContain('table-rows'); // 9-row quick-ref, over the 6-row guideline
     expect(rules).toContain('missing-lang'); // untagged fence
     expect(rules).toContain('code-line-length'); // long line
     expect(rules).toContain('table-columns'); // 4 columns
@@ -148,10 +150,6 @@ cheatsheet:
   difficulty: beginner
   tags: [t]
 ${related ? `  related:\n    - ${related}\n` : ''}---
-
-## At a glance
-
-${atAGlanceTable(10)}
 
 ## Mental model
 
