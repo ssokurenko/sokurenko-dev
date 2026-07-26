@@ -2,16 +2,24 @@
 // Section cards, generated from the taxonomy + live sheet counts.
 // Sections with zero sheets are hidden per specs/04-front-page.md#4-section-grid —
 // eight empty cards would advertise emptiness rather than hide it.
+//
+// A section with exactly one sheet has no index page (there's nothing to
+// index yet) and links straight to that sheet instead — see
+// specs/01-information-architecture.md#section-index-pages. Once a
+// section grows a second sheet, add its `index.mdx` and this switches to
+// linking there automatically.
 import { getCollection } from 'astro:content';
 import { SECTIONS } from '../../config/taxonomy';
 
 const entries = await getCollection('docs');
 
 const sections = SECTIONS.map((section) => {
-	const count = entries.filter(
+	const sheets = entries.filter(
 		(e) => e.id.startsWith(`${section.slug}/`) && e.id !== `${section.slug}/index`,
-	).length;
-	return { ...section, count };
+	);
+	const hasIndexPage = entries.some((e) => e.id === `${section.slug}/index`);
+	const href = sheets.length === 1 && !hasIndexPage ? `/${sheets[0].id}/` : `/${section.slug}/`;
+	return { ...section, count: sheets.length, href };
 }).filter((section) => section.count > 0);
 ---
 
@@ -22,7 +30,7 @@ const sections = SECTIONS.map((section) => {
 			<div class="section-grid">
 				{sections.map((section) => (
 					<a
-						href={`/${section.slug}/`}
+						href={section.href}
 						class="section-card"
 						aria-label={`${section.label}, ${section.count} sheet${section.count === 1 ? '' : 's'}`}
 					>

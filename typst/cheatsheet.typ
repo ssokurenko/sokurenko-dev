@@ -37,6 +37,14 @@
 // heading font as the rest of the document (no display font) — this is a
 // reference, not a poster.
 #let frontmatter(format, title, summary, topic-version, last-verified, url) = {
+  // Local, tight paragraph metrics — this column is ~2.5in of narrow
+  // wrapped text next to the QR, not full-width body prose. Without this
+  // override it inherits the document's body `leading` (1.35em, tuned for
+  // wide single-column paragraphs) for the wrapped summary line, which
+  // reads as an oversized gap next to the tight meta line above it.
+  // Typst's own default leading is ~0.65em — that's the right scale here,
+  // not the body-prose value the document sets globally.
+  set par(leading: 0.55em, spacing: 0.6em, justify: false)
   grid(
     columns: (format.qr-size, 1fr),
     column-gutter: 12pt,
@@ -44,11 +52,11 @@
     tiaoma.qrcode(url, options: (scale: 2.5), width: format.qr-size, height: format.qr-size),
     [
       #text(font: format.heading-font, weight: "bold", size: format.cover-title-size, fill: colors.ink)[#title]
-      #v(0.5em, weak: true)
+      #v(0.4em, weak: true)
       #text(size: format.cover-meta-size, fill: colors.ink-mid)[
         Version #topic-version · verified #last-verified
       ]
-      #v(0.6em, weak: true)
+      #v(0.35em, weak: true)
       #text(size: format.cover-meta-size, fill: colors.ink-mid)[#summary]
     ],
   )
