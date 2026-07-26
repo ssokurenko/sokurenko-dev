@@ -19,6 +19,7 @@
     "pdf:dev": "tsx scripts/pdf/build-pdfs.ts --dev --out public/pdf",
     "pdf:verify": "tsx scripts/pdf/verify-pdfs.ts",
     "verify:samples": "tsx scripts/verify-samples.ts",
+    "verify:sql": "NODE_NO_WARNINGS=1 tsx scripts/verify-sql-samples.ts",
     "check": "astro check && tsc --noEmit",
     "test": "vitest run",
     "verify": "npm run lint && npm run check && npm run test && npm run pdf:verify"
