@@ -17,6 +17,6 @@
   footer-size: 7pt,
   code-inset: 5pt,
   qr-size: 0.9in,
-  cover-title-size: 26pt,
-  cover-meta-size: 9pt,
+  cover-title-size: 16pt,
+  cover-meta-size: 8.5pt,
 )

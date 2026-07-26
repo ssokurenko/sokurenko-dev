@@ -31,34 +31,27 @@
   )
 }
 
-// --- Cover ---------------------------------------------------------------
-#let cover(format, title, summary, topic-version, last-verified, url) = {
-  set align(center)
-  set text(size: format.cover-meta-size, fill: colors.ink-mid)
-  v(0.35in)
-  text(font: "Borel", size: format.cover-title-size)[#title]
-  v(0.5em)
-  [Version #topic-version]
-  v(1em)
-  block(width: 85%)[
-    #set align(center)
-    #set text(size: format.cover-meta-size + 1pt, fill: colors.ink-mid)
-    #summary
-  ]
-  v(1em)
-  tiaoma.qrcode(url, options: (scale: 2.5), width: format.qr-size, height: format.qr-size)
-  v(0.35em)
-  text(size: format.cover-meta-size - 1pt, fill: colors.ink-faint)[Read the latest online]
-  v(0.2em)
-  block(width: 90%)[
-    #set align(center)
-    #set text(size: format.cover-meta-size - 1pt, fill: colors.ink-mid)
-    #url
-  ]
-  v(0.5em, weak: true)
-  text(size: format.cover-meta-size - 1pt, fill: colors.ink-faint)[
-    Last verified #last-verified · sokurenko.dev
-  ]
+// --- Front matter ----------------------------------------------------------
+// A compact header, not a dedicated cover page: QR beside the title/summary,
+// immediately followed by Contents on the same page. Title uses the same
+// heading font as the rest of the document (no display font) — this is a
+// reference, not a poster.
+#let frontmatter(format, title, summary, topic-version, last-verified, url) = {
+  grid(
+    columns: (format.qr-size, 1fr),
+    column-gutter: 12pt,
+    align: (left + top, left + top),
+    tiaoma.qrcode(url, options: (scale: 2.5), width: format.qr-size, height: format.qr-size),
+    [
+      #text(font: format.heading-font, weight: "bold", size: format.cover-title-size, fill: colors.ink)[#title]
+      #v(0.5em, weak: true)
+      #text(size: format.cover-meta-size, fill: colors.ink-mid)[
+        Version #topic-version · verified #last-verified
+      ]
+      #v(0.6em, weak: true)
+      #text(size: format.cover-meta-size, fill: colors.ink-mid)[#summary]
+    ],
+  )
 }
 
 // --- Staleness notice -----------------------------------------------------
@@ -144,13 +137,13 @@
 
   show link: it => underline(text(fill: colors.ink, it))
 
-  // --- Cover page ---
-  cover(format, title, summary, topic-version, last-verified, url)
-  pagebreak()
-
-  // --- Contents ---
-  align(center, text(font: format.heading-font, size: format.h2-size, weight: "semibold")[Contents])
+  // --- Front matter + Contents, one page, no separate title page ---
+  frontmatter(format, title, summary, topic-version, last-verified, url)
   v(1em)
+  line(length: 100%, stroke: 0.5pt + colors.hairline)
+  v(0.8em)
+  text(font: format.heading-font, size: format.h3-size, weight: "semibold", fill: colors.ink-mid)[Contents]
+  v(0.5em)
   outline(title: none, depth: 3)
   pagebreak()
 

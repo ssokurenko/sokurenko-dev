@@ -6,8 +6,7 @@ Each upstream directory's `OFL.txt` is the authoritative license text.
 
 | Font | Source directory | Role |
 |---|---|---|
-| Borel | `ofl/borel/` | PDF cover title only (specs/03-pdf-generation.md) |
-| Inter | `ofl/inter/` | Headings |
+| Inter | `ofl/inter/` | Headings, including the cover title |
 | Source Serif 4 | `ofl/sourceserif4/` | Body text |
 | JetBrains Mono | `ofl/jetbrainsmono/` | Code |
 
