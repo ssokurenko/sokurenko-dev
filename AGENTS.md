@@ -36,23 +36,25 @@ Delivery backlog: [specs/stories/](specs/stories/).
 
 Violating any of these breaks the three-output guarantee or the site's credibility.
 
-1. **No MDX components in cheat sheets.** Cheat sheets (anything with a `cheatsheet` frontmatter block) must be plain `.md` — Typst cannot render JSX, so a component in a sheet means the PDF silently loses content. Page-level UI on a sheet (the PDF download bar, badges) is injected via Starlight **component overrides**, never authored inline. The front page (`index.mdx`) and section index pages (`<section>/index.mdx`) are exempt — they are generated navigation, not cheat sheets, have no PDF, and are explicitly allowed to use components (e.g. `SectionGrid`, `SectionIndex`) for dynamic card grids.
+1. **No MDX components in cheat sheets.** Cheat sheets (anything with a `cheatsheet` frontmatter block) must be plain `.md` — Typst cannot render JSX, so a component in a sheet means the PDF silently loses content. Page-level UI on a sheet (the PDF download bar, badges) is injected via Starlight **component overrides**, never authored inline. Only the front page (`src/content/docs/index.mdx`) is exempt, to use `SectionGrid` for its dynamic card grid.
 
-2. **Code lines ≤ 52 characters.** E-ink cannot scroll horizontally, so overflow is a correctness bug. The limit lives in one exported constant; never hardcode it a second time.
+2. **No section index pages.** No `<section>/index.md` or `<section>/index.mdx`, ever — see [specs/01](specs/01-information-architecture.md#no-section-index-pages) for why this was tried and reversed. The sidebar's `autogenerate` already lists every sheet in a section; the homepage's `SectionGrid` card links straight to a sheet, not an index. Don't reintroduce conditional "index if it exists, else the sheet" logic.
 
-3. **Constrained Markdown only.** Allowed: `##`/`###`, paragraphs, bold/italic/inline code, fenced code with a language tag, ≤ 3-column GFM tables, single-nested lists, links, and the four callout labels (`Gotcha:`, `Note:`, `Tip:`, `Warning:`). Everything else is forbidden — see spec 02 for the full list and the reasons.
+3. **Code lines ≤ 52 characters.** E-ink cannot scroll horizontally, so overflow is a correctness bug. The limit lives in one exported constant; never hardcode it a second time.
 
-4. **Never convey meaning by color alone.** Kindle is grayscale. This also satisfies WCAG 1.4.1.
+4. **Constrained Markdown only.** Allowed: `##`/`###`, paragraphs, bold/italic/inline code, fenced code with a language tag, ≤ 3-column GFM tables, single-nested lists, links, and the four callout labels (`Gotcha:`, `Note:`, `Tip:`, `Warning:`). Everything else is forbidden — see spec 02 for the full list and the reasons.
 
-5. **Slugs are permanent.** A sheet's URL is printed in every PDF footer and encoded in every cover QR code, including copies already sideloaded onto readers. Renaming a slug orphans physical artifacts. If it must change, 301-redirect the old path forever.
+5. **Never convey meaning by color alone.** Kindle is grayscale. This also satisfies WCAG 1.4.1.
 
-6. **`lastVerified` is a human assertion.** It means someone re-read the primary source. Never auto-bump it.
+6. **Slugs are permanent.** A sheet's URL is printed in every PDF footer and encoded in every cover QR code, including copies already sideloaded onto readers. Renaming a slug orphans physical artifacts. If it must change, 301-redirect the old path forever.
 
-7. **Never commit generated artifacts.** `.pdf-cache/`, `src/generated/`, `public/pdf/` are gitignored.
+7. **`lastVerified` is a human assertion.** It means someone re-read the primary source. Never auto-bump it.
 
-8. **The taxonomy lives in one place.** `src/config/taxonomy.ts`. Anything hardcoding a section name a second time is a bug.
+8. **Never commit generated artifacts.** `.pdf-cache/`, `src/generated/`, `public/pdf/` are gitignored.
 
-9. **No framework runtime, no third-party requests.** No React/Vue/Svelte island, no analytics, no CDN, no embeds. Budgets in spec 09.
+9. **The taxonomy lives in one place.** `src/config/taxonomy.ts`. Anything hardcoding a section name a second time is a bug.
+
+10. **No framework runtime, no third-party requests.** No React/Vue/Svelte island, no CDN, no embeds. Budgets in spec 09. (`react`/`react-dom` in `devDependencies` are test-only, for compiling React cheat-sheet samples — see `scripts/verify-samples.ts`. Nothing ships them to the site.)
 
 ## Development
 
@@ -107,10 +109,10 @@ typst/                    templates, formats, theme, vendored fonts + packages
 
 Preserve the existing look — it is deliberate and distinctive.
 
-- **System font stack** on the site title, `h1`, and `h2` (`system-ui, -apple-system, …`) — no web font request, nothing to preload. The site previously used the Borel display font here; it was removed in favor of native platform fonts.
+- **System font stack** on the site title, `h1`, and `h2` (`system-ui, -apple-system, …`) — no web font request, nothing to preload.
 - **LinkedIn blue ramp**: `#004182` / `#0a66c2` / `#dce6f1`, inverted for light mode.
 - **Frosted-glass header** via `backdrop-filter`.
-- PDFs still use **Borel** for the cover title only (vendored in `typst/fonts/`) plus a separate, e-ink-optimized type and colour system — see spec 03. This is unrelated to the website's heading font; do not unify them, and do not remove the PDF's vendored Borel font.
+- PDFs use Inter (the same heading font as the web) throughout, including the front-matter title, plus a separate e-ink-optimized body/code type and grayscale colour system — see spec 03. Both web and PDF previously used a Borel display font; it was removed from both in favor of standard fonts everywhere, and the font itself was deleted from `typst/fonts/`.
 
 ## Documentation
 

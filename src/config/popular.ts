@@ -4,6 +4,4 @@
  * better than a data-driven one at this catalog's size.
  * See specs/04-front-page.md#3-popular-chips.
  */
-export const POPULAR: { label: string; href: string }[] = [
-  { label: 'typescript', href: '/languages/typescript/' },
-];
+export const POPULAR: { label: string; href: string }[] = [];

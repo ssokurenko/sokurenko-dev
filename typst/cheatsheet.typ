@@ -84,7 +84,7 @@
   stale-days: 0,
   body-path: none,
 ) = {
-  set document(title: title, author: "SokurenkoDEV", keywords: ("cheat sheet", title), date: none)
+  set document(title: title, author: "sokurenko.dev", keywords: ("cheat sheet", title), date: none)
 
   set page(
     width: format.page-width,

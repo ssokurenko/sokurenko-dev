@@ -3,24 +3,23 @@
 // Sections with zero sheets are hidden per specs/04-front-page.md#4-section-grid —
 // eight empty cards would advertise emptiness rather than hide it.
 //
-// A section with exactly one sheet has no index page (there's nothing to
-// index yet) and links straight to that sheet instead — see
-// specs/01-information-architecture.md#section-index-pages. Once a
-// section grows a second sheet, add its `index.mdx` and this switches to
-// linking there automatically.
+// There is no section index page (`<section>/index.mdx`) — see
+// specs/01-information-architecture.md#no-section-index-pages. Instead
+// each card lists every sheet in the section as its own badge link, so
+// every real page is reachable straight from the homepage with no
+// intermediate landing page to keep in sync as sheets are added.
 import { getCollection } from 'astro:content';
 import { SECTIONS } from '../../config/taxonomy';
 
 const entries = await getCollection('docs');
 
 const sections = SECTIONS.map((section) => {
-	const sheets = entries.filter(
-		(e) => e.id.startsWith(`${section.slug}/`) && e.id !== `${section.slug}/index`,
-	);
-	const hasIndexPage = entries.some((e) => e.id === `${section.slug}/index`);
-	const href = sheets.length === 1 && !hasIndexPage ? `/${sheets[0].id}/` : `/${section.slug}/`;
-	return { ...section, count: sheets.length, href };
-}).filter((section) => section.count > 0);
+	const sheets = entries
+		.filter((e) => e.id.startsWith(`${section.slug}/`))
+		.map((e) => ({ id: e.id, title: e.data.title }))
+		.sort((a, b) => a.title.localeCompare(b.title));
+	return { ...section, sheets };
+}).filter((section) => section.sheets.length > 0);
 ---
 
 {
@@ -29,17 +28,22 @@ const sections = SECTIONS.map((section) => {
 			<h2 id="browse-heading">Browse by section</h2>
 			<div class="section-grid">
 				{sections.map((section) => (
-					<a
-						href={section.href}
-						class="section-card"
-						aria-label={`${section.label}, ${section.count} sheet${section.count === 1 ? '' : 's'}`}
-					>
-						<span class="section-card-label">{section.label}</span>
-						<span class="section-card-count">
-							{section.count} sheet{section.count === 1 ? '' : 's'}
-						</span>
-						<span class="section-card-blurb">{section.blurb}</span>
-					</a>
+					<div class="section-card">
+						<div class="section-card-head">
+							<span class="section-card-label">{section.label}</span>
+							<span class="section-card-count">
+								{section.sheets.length} sheet{section.sheets.length === 1 ? '' : 's'}
+							</span>
+						</div>
+						<p class="section-card-blurb">{section.blurb}</p>
+						<div class="section-card-badges">
+							{section.sheets.map((sheet) => (
+								<a href={`/${sheet.id}/`} class="sheet-badge">
+									{sheet.title}
+								</a>
+							))}
+						</div>
+					</div>
 				))}
 			</div>
 		</section>
@@ -65,28 +69,26 @@ const sections = SECTIONS.map((section) => {
 	.section-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+		align-items: stretch;
 		gap: 1rem;
 	}
 
 	.section-card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		height: 100%;
+		gap: 0.6rem;
 		padding: 1.25rem;
 		border-radius: 12px;
 		border: 1px solid var(--sl-color-gray-5);
 		background: var(--sl-color-bg-nav);
-		text-decoration: none;
-		color: inherit;
-		transition: transform 150ms ease-out, border-color 150ms ease-out;
 	}
 
-	@media (prefers-reduced-motion: no-preference) {
-		.section-card:hover,
-		.section-card:focus-visible {
-			transform: translateY(-2px);
-			border-color: var(--sl-color-accent);
-		}
+	.section-card-head {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem;
 	}
 
 	.section-card-label {
@@ -99,11 +101,39 @@ const sections = SECTIONS.map((section) => {
 		font-size: 0.8rem;
 		color: var(--sl-color-accent);
 		font-weight: 600;
+		white-space: nowrap;
 	}
 
 	.section-card-blurb {
 		font-size: 0.85rem;
 		color: var(--sl-color-gray-2);
 		line-height: 1.4;
+		margin: 0;
+	}
+
+	.section-card-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-block-start: 0.25rem;
+	}
+
+	.sheet-badge {
+		display: inline-block;
+		padding: 0.3rem 0.7rem;
+		border-radius: 999px;
+		border: 1px solid var(--sl-color-gray-5);
+		background: var(--sl-color-bg);
+		color: var(--sl-color-gray-1);
+		font-size: 0.8rem;
+		font-weight: 500;
+		text-decoration: none;
+		transition: border-color 150ms ease-out, color 150ms ease-out;
+	}
+
+	.sheet-badge:hover,
+	.sheet-badge:focus-visible {
+		border-color: var(--sl-color-accent);
+		color: var(--sl-color-accent);
 	}
 </style>
