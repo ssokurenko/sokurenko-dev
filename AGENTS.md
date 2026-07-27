@@ -54,7 +54,7 @@ Violating any of these breaks the three-output guarantee or the site's credibili
 
 9. **The taxonomy lives in one place.** `src/config/taxonomy.ts`. Anything hardcoding a section name a second time is a bug.
 
-10. **No framework runtime, no third-party requests.** No React/Vue/Svelte island, no CDN, no embeds. Budgets in spec 09. (`react`/`react-dom` in `devDependencies` are test-only, for compiling React cheat-sheet samples — see `scripts/verify-samples.ts`. Nothing ships them to the site.)
+10. **No framework runtime, no third-party requests — except Google Analytics.** No React/Vue/Svelte island, no CDN, no embeds. Google Analytics (`gtag.js`) is the one deliberate exception, injected via Starlight's `head` config in `astro.config.mjs`, loaded `async`. Budgets in spec 09. (`react`/`react-dom` in `devDependencies` are test-only, for compiling React cheat-sheet samples — see `scripts/verify-samples.ts`. Nothing ships them to the site.)
 
 ## Development
 

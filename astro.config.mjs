@@ -21,6 +21,27 @@ export default defineConfig({
 			title: 'SokurenkoDEV',
 			customCss: ['./src/styles/custom.css'],
 			social: [],
+			// Google Analytics: the one deliberate exception to the
+			// site's zero-third-party-request policy — see
+			// specs/09-quality-bar.md#performance-budgets. Injected via
+			// Starlight's `head` so it lands on every page, `async` so
+			// it never blocks render.
+			head: [
+				{
+					tag: 'script',
+					attrs: {
+						src: 'https://www.googletagmanager.com/gtag/js?id=G-79T6FT7YES',
+						async: true,
+					},
+				},
+				{
+					tag: 'script',
+					content: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-79T6FT7YES');`,
+				},
+			],
 			components: {
 				Search: './src/components/Search.astro',
 				PageTitle: './src/components/PageTitle.astro',
