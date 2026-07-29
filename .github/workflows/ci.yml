@@ -61,6 +61,7 @@ jobs:
           name: cheat-sheet-pdfs
           path: .pdf-cache/*.pdf
           retention-days: 14
+          if-no-files-found: ignore
 
       - name: Build site
         run: npx astro build && npm run pdf:copy
@@ -69,9 +70,8 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: >
-            --base dist
+            --base-url "file://$GITHUB_WORKSPACE/dist/"
             --no-progress
-            --exclude-mail
             'dist/**/*.html'
           fail: true
 
