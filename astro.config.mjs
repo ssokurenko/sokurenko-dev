@@ -21,6 +21,10 @@ export default defineConfig({
 			title: 'SokurenkoDEV',
 			customCss: ['./src/styles/custom.css'],
 			social: [],
+			// Set explicitly because it is no longer Starlight's default
+			// `./favicon.svg`, which was deleted. Shares the hero
+			// illustration rather than being its own asset.
+			favicon: '/illustrations/hero.svg',
 			// Google Analytics: the one deliberate exception to the
 			// site's zero-third-party-request policy — see
 			// specs/09-quality-bar.md#performance-budgets. Injected via

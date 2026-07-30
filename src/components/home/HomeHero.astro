@@ -3,27 +3,116 @@ import PopularChips from './PopularChips.astro';
 ---
 
 <div class="home-hero">
-	<h1 class="home-headline">Cheat sheets for the entire web stack</h1>
-	<p class="home-tagline">
-		Quick, accurate answers for the languages, frameworks, and tools
-		you use every day — each sheet verified against primary sources,
-		and typeset for reading on your Kindle.
-	</p>
-	<PopularChips />
+	<div class="home-hero-copy">
+		{/*
+			Two tiers rather than one flat sentence: the noun says what the site
+			is and gets the display size, the qualifier says how far it reaches
+			and steps down out of the way. Split into spans purely for type —
+			the accessible name is still the whole sentence.
+		*/}
+		<h1 class="home-headline">
+			<span class="home-headline-lead">Cheat sheets</span>
+			<span class="home-headline-rest">
+				for every layer of the <span class="home-headline-mark">web&nbsp;stack</span>
+			</span>
+		</h1>
+		<p class="home-tagline">
+			Quick, accurate answers for the languages, frameworks, and tools
+			you use every day — each sheet verified against primary sources,
+			and typeset for reading on your Kindle.
+		</p>
+		<PopularChips />
+	</div>
+	{/*
+		Decorative, so alt="" — it repeats the headline rather than adding to it.
+		Plain <img> from public/ rather than inlined: 51 KB of markup on every
+		home-page load, uncacheable, versus one separately cached request that
+		does not block render. width/height are the SVG's own viewBox units,
+		present only to give the box an aspect ratio so nothing reflows when it
+		arrives (spec 04 targets CLS < 0.05).
+	*/}
+	<img
+		class="home-hero-art"
+		src="/illustrations/hero.svg"
+		alt=""
+		width="212"
+		height="160"
+		decoding="async"
+	/>
 </div>
 
 <style>
 	.home-hero {
-		max-width: 40rem;
+		max-width: 72rem;
 		margin-inline: auto;
 		padding-inline: 1.5rem;
 		padding-block-start: 3rem;
 		text-align: center;
 	}
 
+	/* All of the display treatment is weight, scale, tracking and the accent
+	   ramp — spec 04 allows no web-font request, so there is no display face to
+	   reach for. `em` throughout so the whole lockup scales off the one clamp. */
 	.home-headline {
 		font-size: clamp(2.5rem, 6vw, 4rem);
 		margin-block-end: 0.75rem;
+		text-wrap: balance;
+	}
+
+	.home-headline-lead {
+		display: block;
+		font-weight: 800;
+		/* Negative tracking only works at display size; it would hurt legibility
+		   on the second tier, which is why that one keeps its own value. */
+		letter-spacing: -0.035em;
+		line-height: 0.95;
+	}
+
+	.home-headline-rest {
+		display: block;
+		font-size: 0.44em;
+		font-weight: 500;
+		letter-spacing: -0.005em;
+		line-height: 1.25;
+		color: var(--sl-color-gray-2);
+		margin-block-start: 0.5em;
+	}
+
+	/* Marker highlight over the bottom half of the letters, not a rule under
+	   them: a thin accent rule under bold accent text reads as a hyperlink, and
+	   this phrase isn't one. The text itself stays the body colour for the same
+	   reason, which also keeps it legible if the background is dropped —
+	   forced-colors mode discards it and nothing is lost.  */
+	/* Yellow highlighter over the bottom of the letters. Deliberately not the
+	   accent ramp: a blue rule under bold blue text reads as a hyperlink, and
+	   this phrase isn't one — and the yellow picks up the sticky note in the
+	   hero illustration. */
+	.home-headline-mark {
+		/* Slightly deeper in dark mode, where a full-brightness marker glares
+		   against a near-black page. Dark default, light override, matching the
+		   order in src/styles/custom.css. */
+		--mark: #f2c744;
+
+		font-weight: 700;
+		/* Fixed dark ink, not --sl-color-white: the mark is light in BOTH
+		   themes, so the theme-flipping token would put white on yellow in dark
+		   mode at roughly 1.6:1. This holds ~11:1 either way. */
+		color: #1c1c1e;
+		/* Covers the full glyph height rather than banding the lower half. A
+		   half-height band leaves the ascenders sitting on the page background,
+		   which in dark mode means dark ink on a near-black page — the tops of
+		   the letters disappear. Full coverage is also closer to how a real
+		   highlighter lands. */
+		background-color: var(--mark);
+		padding: 0.04em 0.14em 0.08em;
+		border-radius: 0.1em;
+		/* Keeps both fragments boxed if it ever wraps. */
+		box-decoration-break: clone;
+		-webkit-box-decoration-break: clone;
+	}
+
+	:global(:root[data-theme='light']) .home-headline-mark {
+		--mark: #ffdf5e;
 	}
 
 	.home-tagline {
@@ -31,5 +120,44 @@ import PopularChips from './PopularChips.astro';
 		max-width: 54ch;
 		margin-inline: auto;
 		margin-block-end: 2rem;
+	}
+
+	/* Deliberately small while stacked. At full width it costs ~320 px of
+	   vertical space and pushes "Browse by section" — the one interaction the
+	   front page exists for (spec 04) — off the fold on a laptop at 900 px and
+	   on most phones. Capped, it stays a supporting mark. */
+	.home-hero-art {
+		display: block;
+		inline-size: 100%;
+		max-inline-size: 20rem;
+		block-size: auto;
+		margin: 2rem auto 0;
+	}
+
+	/* Side-by-side only once both columns can hold their content: the
+	   illustration wants ~24rem before it reads as a thumbnail, and the
+	   headline needs ~28rem to avoid breaking "web stack" onto a third line at
+	   its clamped 4rem size. Below that the two stack, art last — the copy and
+	   the chips are what the reader came for, so they stay first in the scroll
+	   as well as first in the DOM. */
+	@media (min-width: 58rem) {
+		.home-hero {
+			display: grid;
+			grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+			gap: clamp(2rem, 5vw, 4rem);
+			align-items: center;
+			text-align: start;
+			padding-block-start: 4rem;
+		}
+
+		.home-tagline {
+			margin-inline: 0;
+			margin-block-end: 1.75rem;
+		}
+
+		.home-hero-art {
+			max-inline-size: none;
+			margin: 0;
+		}
 	}
 </style>
