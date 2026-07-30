@@ -1,0 +1,104 @@
+---
+// Nav-bar logo, overriding Starlight's SiteTitle.
+//
+// Two departures from the default:
+//   1. Nothing renders on the home page. The HomeHero headline already names
+//      the site one screen-height below, and a nav logo linking to the page
+//      you are already on is a dead control.
+//   2. Elsewhere it shows the hero illustration, and rolls over to the
+//      "sokurenko.dev" wordmark on hover or keyboard focus.
+const { siteTitleHref } = Astro.locals.starlightRoute;
+
+// Compared against BASE_URL rather than reading Starlight's route id/slug, so
+// this does not depend on which internal shape those take.
+const strip = (p: string) => p.replace(/\/+$/, '');
+const isHome = strip(Astro.url.pathname) === strip(import.meta.env.BASE_URL);
+---
+
+{
+	!isHome && (
+		<a href={siteTitleHref} class="site-title">
+			<span class="logo-roll">
+				<span class="logo-reel">
+					{/*
+						alt="" — the wordmark below it is real text, so the link already
+						has "sokurenko.dev" as its accessible name. Announcing the
+						illustration too would only duplicate it.
+					*/}
+					<img class="logo-art" src="/illustrations/hero.svg" alt="" width="212" height="160" />
+					{/*
+						Not `siteTitle` from config: that is "SokurenkoDEV", used for
+						<title> tags. This is the domain wordmark, a different string.
+					*/}
+					<span class="logo-word" translate="no">sokurenko.dev</span>
+				</span>
+			</span>
+		</a>
+	)
+}
+
+<style>
+	.site-title {
+		/* Starlight's own logo height, not a magic number. */
+		--logo-h: calc(var(--sl-nav-height) - 2 * var(--sl-nav-pad-y));
+
+		display: flex;
+		align-items: center;
+		font-size: var(--sl-text-h4);
+		font-weight: 600;
+		color: var(--sl-color-text-accent);
+		text-decoration: none;
+		min-width: 0;
+	}
+
+	/* A slot-reel: one cell tall, showing whichever of the two stacked rows is
+	   currently scrolled into it. */
+	.logo-roll {
+		display: block;
+		block-size: var(--logo-h);
+		overflow: hidden;
+	}
+
+	/* Both rows are given an explicit height. They must be definite — with an
+	   auto row, the art's `block-size: 100%` has nothing to resolve against, so
+	   it falls back to its intrinsic size and stretches the column to 158 px.
+	   The column is as wide as the wider row (the wordmark), and that width does
+	   not change with hover state — which is the point, since a width that
+	   changed would shove the search box sideways on every hover. It also
+	   matches the footprint of the plain text title this replaces. */
+	.logo-reel {
+		display: grid;
+		grid-template-rows: var(--logo-h) var(--logo-h);
+		justify-items: start;
+		align-items: center;
+		/* 150 ms ease-out is the site's motion language (spec 04). Moving the
+		   reel rather than the two rows independently keeps the roll
+		   continuous — cross-fading them left a frame where neither was on
+		   screen and the logo appeared to blink out. */
+		transition: transform 150ms ease-out;
+	}
+
+	.site-title:hover .logo-reel,
+	.site-title:focus-visible .logo-reel {
+		transform: translateY(calc(-1 * var(--logo-h)));
+	}
+
+	.logo-art {
+		block-size: 100%;
+		inline-size: auto;
+		object-fit: contain;
+		object-position: 0 50%;
+	}
+
+	.logo-word {
+		white-space: nowrap;
+	}
+
+	/* Spec 04 keeps all motion inside no-preference. The reel still swaps, it
+	   just arrives instantly — a state change rather than a movement. */
+	@media (prefers-reduced-motion: reduce) {
+		.logo-reel {
+			transition: none;
+		}
+	}
+</style>

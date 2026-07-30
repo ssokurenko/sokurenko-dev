@@ -47,6 +47,7 @@ gtag('config', 'G-79T6FT7YES');`,
 				},
 			],
 			components: {
+				SiteTitle: './src/components/SiteTitle.astro',
 				Search: './src/components/Search.astro',
 				PageTitle: './src/components/PageTitle.astro',
 				Footer: './src/components/Footer.astro',
