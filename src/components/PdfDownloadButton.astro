@@ -1,0 +1,187 @@
+---
+// One PDF download button. Extracted from PdfDownloadBar so that the bar
+// decides *what* to offer (manifest lookup, dev/prod failure modes) and this
+// decides *how* a single offer looks.
+//
+// The contract from specs/06-cheatsheet-page-template.md#requirements lives
+// here now and must be preserved: `download` so it saves instead of opening
+// in the browser's PDF viewer, `type="application/pdf"`, a human-meaningful
+// filename, and an aria-label that states the file size — "downloads a
+// 412 KB file" is information a screen-reader user needs before activating.
+interface Props {
+  href: string;
+  /** Saved filename, e.g. `typescript-cheatsheet-kindle-small.pdf`. */
+  filename: string;
+  /** Size class, e.g. `Kindle small`. */
+  label: string;
+  /** Named target device, e.g. `Paperwhite 6.8″`, so the choice needs no explanation. */
+  device: string;
+  pages: number;
+  bytes: number;
+}
+const { href, filename, label, device, pages, bytes } = Astro.props;
+
+// KB is the right granularity: every sheet lands between ~100 KB and ~1 MB,
+// and exact bytes are noise.
+const size = `${Math.round(bytes / 1024)} KB`;
+
+// aria-label overrides the inner text wholesale, so the "Free" pill is not
+// announced twice — it has to be spelled out here instead.
+const ariaLabel = `Download the free ${label} PDF for ${device}, ${pages} pages, ${size}`;
+---
+
+<a
+	class="pdf-download"
+	href={href}
+	download={filename}
+	type="application/pdf"
+	aria-label={ariaLabel}
+>
+	<span class="pdf-download-icon" aria-hidden="true">
+		{/* Inlined download glyph (arrow into tray). Inline rather than an
+		    <img>/sprite so it inherits currentColor on hover and costs no
+		    extra request — spec 09's budget allows no third-party assets. */}
+		<svg
+			viewBox="0 0 24 24"
+			width="20"
+			height="20"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			focusable="false"
+		>
+			<path d="M12 3v11" />
+			<path d="M7.5 9.5 12 14l4.5-4.5" />
+			<path d="M4 16.5v2.5A1.5 1.5 0 0 0 5.5 20.5h13a1.5 1.5 0 0 0 1.5-1.5v-2.5" />
+		</svg>
+	</span>
+	<span class="pdf-download-text">
+		<span class="pdf-download-head">
+			<span class="pdf-download-label">{label}</span>
+			<span class="pdf-download-free">Free</span>
+		</span>
+		<span class="pdf-download-meta">{device} · {pages} pages · {size}</span>
+	</span>
+</a>
+
+<style>
+	.pdf-download {
+		/* Science Blue (--sl-color-accent) is the same #0a66c2 in both themes,
+		   so the text that sits on top of it is a literal white in both —
+		   Starlight's --sl-color-white flips to near-black in light mode and
+		   would drop the pill to 3.6:1. */
+		--on-accent: #fff;
+
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+		padding: 0.6rem 0.75rem;
+		border-radius: 10px;
+		/* Outlined, not filled: the bar must not out-shout the "At a glance"
+		   table for first attention (spec 06). The pop comes from the pill. */
+		border: 1px solid var(--sl-color-accent);
+		background: var(--sl-color-bg);
+		color: var(--sl-color-white);
+		text-decoration: none;
+		line-height: 1.25;
+		transition:
+			background-color 120ms ease,
+			border-color 120ms ease,
+			transform 120ms ease,
+			box-shadow 120ms ease;
+	}
+
+	.pdf-download:hover,
+	.pdf-download:focus-visible {
+		background: var(--sl-color-accent-low);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 14px -6px var(--sl-color-accent);
+	}
+
+	.pdf-download:active {
+		transform: translateY(0);
+		box-shadow: none;
+	}
+
+	.pdf-download-icon {
+		display: grid;
+		place-items: center;
+		flex-shrink: 0;
+		inline-size: 2rem;
+		block-size: 2rem;
+		border-radius: 8px;
+		background: var(--sl-color-accent-low);
+		color: var(--sl-color-accent-high);
+		transition:
+			background-color 120ms ease,
+			color 120ms ease;
+	}
+
+	.pdf-download:hover .pdf-download-icon,
+	.pdf-download:focus-visible .pdf-download-icon {
+		background: var(--sl-color-accent);
+		color: var(--on-accent);
+	}
+
+	/* Motion is decoration here; the color and pill changes carry the state. */
+	@media (prefers-reduced-motion: reduce) {
+		.pdf-download,
+		.pdf-download-icon {
+			transition: none;
+		}
+		.pdf-download:hover,
+		.pdf-download:focus-visible {
+			transform: none;
+		}
+	}
+
+	.pdf-download-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		min-inline-size: 0;
+		flex: 1;
+	}
+
+	/* Pill sits beside the label rather than at the far edge of the button, so
+	   the meta line gets the button's full width and "Paperwhite 6.8″ · 12
+	   pages · 155 KB" stays on one line in a two-column bar. */
+	.pdf-download-head {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.pdf-download-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+	}
+
+	.pdf-download-meta {
+		font-size: 0.75rem;
+		/* gray-2, not gray-3: gray-3 drops under 4.5:1 against the accent-low
+		   hover fill in dark mode. */
+		color: var(--sl-color-gray-2);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.pdf-download-free {
+		flex-shrink: 0;
+		font-size: 0.625rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		padding: 0.1rem 0.4rem;
+		border-radius: 999px;
+		background: var(--sl-color-accent);
+		color: var(--on-accent);
+	}
+
+	@media print {
+		.pdf-download {
+			display: none;
+		}
+	}
+</style>

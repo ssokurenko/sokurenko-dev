@@ -2,11 +2,15 @@
 // PDF download bar, per specs/06-cheatsheet-page-template.md#pdf-download-bar
 // and specs/stories/epic-b-pdf.md#b7.
 //
+// This component owns *what* is offered — manifest lookup and the dev/prod
+// failure modes. How a single offer looks belongs to PdfDownloadButton.
+//
 // Reads the manifest at runtime (not a static JSON import) so a missing
 // manifest in `astro dev` — which never builds PDFs — degrades to a
 // disabled state instead of failing the whole page.
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import PdfDownloadButton from './PdfDownloadButton.astro';
 
 interface Props {
   slug: string;
@@ -18,10 +22,6 @@ const manifest = existsSync(MANIFEST_PATH) ? JSON.parse(readFileSync(MANIFEST_PA
 const entry = manifest[slug] as
   | { small: { path: string; bytes: number; pages: number }; large: { path: string; bytes: number; pages: number } }
   | undefined;
-
-function formatSize(bytes: number): string {
-  return `${Math.round(bytes / 1024)} KB`;
-}
 
 const isProd = import.meta.env.PROD;
 
@@ -39,30 +39,34 @@ if (isProd && !entry) {
 	{
 		entry ? (
 			<>
-				<a
-					class="pdf-button"
-					href={entry.small.path}
-					download={`${slug}-cheatsheet-kindle-small.pdf`}
-					type="application/pdf"
-					aria-label={`Download Kindle small PDF, ${entry.small.pages} pages, ${formatSize(entry.small.bytes)}`}
-				>
-					⬇ Kindle small (Paperwhite 6.8″) · {entry.small.pages}pp · {formatSize(entry.small.bytes)}
-				</a>
-				<a
-					class="pdf-button"
-					href={entry.large.path}
-					download={`${slug}-cheatsheet-kindle-large.pdf`}
-					type="application/pdf"
-					aria-label={`Download Kindle large PDF, ${entry.large.pages} pages, ${formatSize(entry.large.bytes)}`}
-				>
-					⬇ Kindle large (Scribe 10.2″) · {entry.large.pages}pp · {formatSize(entry.large.bytes)}
-				</a>
+				<p class="pdf-bar-lede">
+					<strong>Free download</strong> — typeset for e-ink, small and large.
+					No signup, no email.
+				</p>
+				<div class="pdf-bar-buttons">
+					<PdfDownloadButton
+						href={entry.small.path}
+						filename={`${slug}-cheatsheet-kindle-small.pdf`}
+						label="Kindle small"
+						device="Paperwhite 6.8″"
+						pages={entry.small.pages}
+						bytes={entry.small.bytes}
+					/>
+					<PdfDownloadButton
+						href={entry.large.path}
+						filename={`${slug}-cheatsheet-kindle-large.pdf`}
+						label="Kindle large"
+						device="Scribe 10.2″"
+						pages={entry.large.pages}
+						bytes={entry.large.bytes}
+					/>
+				</div>
 				<a class="pdf-hint" href="https://www.amazon.com/sendtokindle" target="_blank" rel="noopener">
 					Send to Kindle →
 				</a>
 			</>
 		) : (
-			<span class="pdf-button pdf-button-disabled" aria-disabled="true">
+			<span class="pdf-bar-disabled" aria-disabled="true">
 				PDF not built — run `npm run pdf:dev -- {slug}`
 			</span>
 		)
@@ -71,46 +75,56 @@ if (isProd && !entry) {
 
 <style>
 	.pdf-bar {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.6rem;
-		margin-block: 1rem 1.5rem;
+		margin-block: 1rem 1.75rem;
+		padding: 0.9rem 1rem 1rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 12px;
+		/* Plain surface first, then a faint accent wash where color-mix is
+		   supported — in dark mode gray-7 alone is nearly the page background
+		   and the panel reads as a bare outline. Kept at 4% so the light-mode
+		   panel stays clearly distinct from a hovered button's accent-low
+		   fill; a heavier wash makes hover almost invisible. */
+		background: var(--sl-color-gray-7);
+		background: color-mix(in srgb, var(--sl-color-accent) 4%, var(--sl-color-gray-7));
 	}
 
-	.pdf-button {
-		font-size: 0.8rem;
-		padding: 0.45rem 0.8rem;
-		border-radius: 8px;
-		border: 1px solid var(--sl-color-accent);
-		color: var(--sl-color-accent);
-		text-decoration: none;
-		background: transparent;
-	}
-
-	.pdf-button:hover {
-		background: var(--sl-color-accent-low);
-	}
-
-	.pdf-button-disabled {
-		border-color: var(--sl-color-gray-5);
-		color: var(--sl-color-gray-4);
-		cursor: not-allowed;
-	}
-
-	.pdf-hint {
-		font-size: 0.8rem;
+	.pdf-bar-lede {
+		margin: 0 0 0.7rem;
+		font-size: 0.8125rem;
 		color: var(--sl-color-gray-2);
 	}
 
-	@media (max-width: 30rem) {
-		.pdf-bar {
-			flex-direction: column;
-			align-items: stretch;
-		}
-		.pdf-button {
-			text-align: center;
-		}
+	.pdf-bar-lede strong {
+		color: var(--sl-color-white);
+	}
+
+	/* Two equal columns where they fit, one column where they don't. The
+	   30rem breakpoint in spec 06 is expressed as the minmax floor so the
+	   buttons also stack inside a narrowed content column, not just on a
+	   narrow viewport. */
+	.pdf-bar-buttons {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: 0.6rem;
+	}
+
+	.pdf-hint {
+		margin-block-start: 0.7rem;
+		font-size: 0.75rem;
+		color: var(--sl-color-gray-2);
+		text-decoration: none;
+	}
+
+	.pdf-hint:hover {
+		color: var(--sl-color-text-accent);
+		text-decoration: underline;
+	}
+
+	.pdf-bar-disabled {
+		display: block;
+		font-size: 0.8rem;
+		color: var(--sl-color-gray-3);
+		cursor: not-allowed;
 	}
 
 	@media print {
