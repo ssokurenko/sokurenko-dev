@@ -9,8 +9,6 @@ cheatsheet:
   verifiedAgainst:
     - label: Express Documentation
       url: https://expressjs.com/
-    - label: Express TypeScript Guide
-      url: https://expressjs.com/en/guide/typescript.html
   lastVerified: 2026-07-31
   difficulty: intermediate
   tags: [api, server, web]
