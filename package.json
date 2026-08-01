@@ -20,6 +20,7 @@
     "pdf:verify": "tsx scripts/pdf/verify-pdfs.ts",
     "verify:samples": "tsx scripts/verify-samples.ts",
     "verify:sql": "NODE_NO_WARNINGS=1 tsx scripts/verify-sql-samples.ts",
+    "verify:graphql": "tsx scripts/verify-graphql-samples.ts",
     "check": "astro check && tsc --noEmit",
     "test": "vitest run",
     "verify": "npm run lint && npm run check && npm run test && npm run pdf:verify"
@@ -38,6 +39,7 @@
     "@types/react-dom": "^19.2.3",
     "express": "^5.2.1",
     "fast-glob": "^3.3.3",
+    "graphql": "^16.8.1",
     "gray-matter": "^4.0.3",
     "hast-util-to-string": "^3.0.1",
     "jsqr": "^1.4.0",
