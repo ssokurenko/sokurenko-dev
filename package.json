@@ -20,13 +20,15 @@
     "pdf:verify": "tsx scripts/pdf/verify-pdfs.ts",
     "verify:samples": "tsx scripts/verify-samples.ts",
     "verify:sql": "NODE_NO_WARNINGS=1 tsx scripts/verify-sql-samples.ts",
+    "verify:graphql": "tsx scripts/verify-graphql-samples.ts",
     "check": "astro check && tsc --noEmit",
     "test": "vitest run",
-    "verify": "npm run lint && npm run check && npm run test && npm run pdf:verify"
+    "verify": "npm run lint && npm run check && npm run test && npm run pdf:verify && npm run verify:samples && npm run verify:sql && npm run verify:graphql"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.3",
     "astro": "^7.0.2",
+    "graphql": "^17.0.2",
     "sharp": "^0.34.5",
     "zod": "^4.4.3"
   },
