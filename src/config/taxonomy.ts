@@ -1,10 +1,19 @@
 /**
- * The eight top-level sections of the catalog. This is the single source
+ * The nine top-level sections of the catalog. This is the single source
  * of truth for the taxonomy — see specs/01-information-architecture.md.
  * The Zod schema, sidebar config, front page, and PDF templates all derive
  * from this array. Do not hardcode a section slug or label anywhere else.
+ *
+ * Array order is display order: it drives the sidebar and the front-page
+ * grid. `foundations` is first deliberately — it holds the sheets a reader
+ * should meet before any stack-specific one.
  */
 export const SECTIONS = [
+  {
+    slug: 'foundations',
+    label: 'Foundations',
+    blurb: 'Concepts that come before any language or framework.',
+  },
   {
     slug: 'languages',
     label: 'Languages',
