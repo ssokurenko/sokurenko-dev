@@ -13,6 +13,7 @@
 import { visit } from 'unist-util-visit';
 import { toString as hastToString } from 'hast-util-to-string';
 import { SYMBOL_ALIASES } from '../src/config/symbol-aliases.ts';
+import { hasTopicVersion } from '../src/config/cheatsheet-schema.ts';
 
 type HastNode = any;
 
@@ -45,7 +46,14 @@ export function rehypePagefindWeights() {
       // Attach section/difficulty/tag metadata + filters once, on the
       // first real element, so Pagefind's per-page facets are populated.
       if (!metaAttached && cs) {
-        setProp(node, 'dataPagefindMeta', `section:${cs.section}, difficulty:${cs.difficulty}, version:${cs.topicVersion}`);
+        // A versionless sheet contributes no `version` key at all, rather
+        // than `version:N/A` — see hasTopicVersion.
+        const meta = [
+          `section:${cs.section}`,
+          `difficulty:${cs.difficulty}`,
+          ...(hasTopicVersion(cs.topicVersion) ? [`version:${cs.topicVersion}`] : []),
+        ];
+        setProp(node, 'dataPagefindMeta', meta.join(', '));
         const filterValues = [
           `section:${cs.section}`,
           `difficulty:${cs.difficulty}`,

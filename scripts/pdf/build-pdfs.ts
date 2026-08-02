@@ -18,7 +18,12 @@ import matter from 'gray-matter';
 import { PDFDocument } from 'pdf-lib';
 import { assertTypstInstalled, typstCompile, REPO_ROOT } from './typst-runner.ts';
 import { prepareBody } from './prepare-body.ts';
-import { cheatsheetSchema } from '../../src/config/cheatsheet-schema.ts';
+import {
+  cheatsheetSchema,
+  hasTopicVersion,
+  isStale,
+  formatVerificationAge,
+} from '../../src/config/cheatsheet-schema.ts';
 
 const args = process.argv.slice(2);
 const FORCE = args.includes('--force');
@@ -111,13 +116,31 @@ async function main() {
 
     const url = `https://sokurenko.dev/${cs.section}/${cs.slug}/`;
     const lastVerified = cs.lastVerified.toISOString().slice(0, 10);
+    // The template has always had a staleness notice and the params to
+    // drive it, but nothing passed them — so the warning specs/06 promises
+    // "also appears in the PDF" never did. A sideloaded PDF is exactly
+    // where a reader can't check the site for a newer version, so it is
+    // the output that needs the warning most.
+    const stale = isStale(cs.lastVerified);
+    const staleAge = stale
+      ? formatVerificationAge(Math.round((Date.now() - cs.lastVerified.getTime()) / 86_400_000))
+      : '';
 
     for (const format of FORMATS) {
       const cacheKey = `${cs.slug}:${format}`;
+      // `staleAge` is in the key because it is the one rendered value that
+      // changes with the calendar rather than with the source: without it a
+      // sheet that crossed the 180-day line — or aged from "7 months" to
+      // "8 months" — would keep serving the cached PDF forever.
       const contentHash = sha256(
-        [preparedBody, JSON.stringify(cs), templateFingerprint, formatConfigSource(format), 'typst:0.15.x'].join(
-          '\n---\n',
-        ),
+        [
+          preparedBody,
+          JSON.stringify(cs),
+          staleAge,
+          templateFingerprint,
+          formatConfigSource(format),
+          'typst:0.15.x',
+        ].join('\n---\n'),
       );
 
       const outFile = path.join(OUT_DIR, `${cs.slug}-kindle-${format}.pdf`);
@@ -152,8 +175,12 @@ async function main() {
         `  title: ${JSON.stringify(String((data as any).title ?? cs.slug))},`,
         `  summary: ${JSON.stringify(cs.summary)},`,
         `  url: ${JSON.stringify(url)},`,
-        `  topic-version: ${JSON.stringify(cs.topicVersion)},`,
+        // Empty means "no version to pin" — the template drops the
+        // segment rather than printing "Version N/A" on the cover.
+        `  topic-version: ${JSON.stringify(hasTopicVersion(cs.topicVersion) ? cs.topicVersion : '')},`,
         `  last-verified: ${JSON.stringify(lastVerified)},`,
+        `  stale: ${stale},`,
+        `  stale-age: ${JSON.stringify(staleAge)},`,
         `  body-path: ${JSON.stringify(rootRelativeBodyPath)},`,
         ')',
       ].join('\n');

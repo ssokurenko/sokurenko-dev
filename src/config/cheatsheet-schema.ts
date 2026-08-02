@@ -48,3 +48,41 @@ export function isStale(lastVerified: Date): boolean {
   const ageDays = ageMs / (1000 * 60 * 60 * 24);
   return ageDays > STALENESS_WARNING_DAYS;
 }
+
+/**
+ * How old a verification is, in the unit the number actually means:
+ * "805 days" makes a reader do arithmetic to learn what "2 years" says
+ * outright. Lives here rather than in the page component because the PDF
+ * prints the same sentence — and because the PDF cache keys on this
+ * string, so a cached file rebuilds exactly when its wording changes.
+ */
+export function formatVerificationAge(days: number): string {
+  if (days < 60) return `${days} days`;
+  const months = Math.round(days / 30.44);
+  if (months < 24) return `${months} months`;
+  return `${Math.round(days / 365.25)} years`;
+}
+
+/**
+ * Some subjects have no version to pin — REST, API concepts, HTTP. Those
+ * sheets record `topicVersion: "N/A"`, which is honest frontmatter but a
+ * bad badge: "vN/A" looks like a version string and answers the reader's
+ * "is this current?" with noise. Treat those values as *absent* wherever
+ * the version is displayed — the page badge, the PDF front matter, and
+ * search metadata all import this rather than testing for "N/A" again.
+ */
+const NO_VERSION = new Set(['', 'n/a', 'na', 'none', 'not applicable', '-', '—', 'tbd']);
+
+export function hasTopicVersion(topicVersion: string | undefined): boolean {
+  return topicVersion != null && !NO_VERSION.has(topicVersion.trim().toLowerCase());
+}
+
+/**
+ * `5.9` → `v5.9`, but `.NET 9`, `ES2026`, and `GraphQL Spec` are shown as
+ * authored: the `v` prefix only reads as a version in front of a number,
+ * and blanket-prefixing produced "vGraphQL Spec" and "v.NET 9".
+ */
+export function formatTopicVersion(topicVersion: string): string {
+  const value = topicVersion.trim();
+  return /^\d/.test(value) ? `v${value}` : value;
+}

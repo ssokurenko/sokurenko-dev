@@ -45,6 +45,13 @@
   // Typst's own default leading is ~0.65em — that's the right scale here,
   // not the body-prose value the document sets globally.
   set par(leading: 0.55em, spacing: 0.6em, justify: false)
+  // A versionless subject (REST, API concepts) passes an empty version and
+  // gets no "Version …" segment — the web badge hides for the same reason.
+  let meta-line = if topic-version.trim() != "" {
+    "Version " + topic-version + " · verified " + last-verified
+  } else {
+    "Verified " + last-verified
+  }
   grid(
     columns: (format.qr-size, 1fr),
     column-gutter: 12pt,
@@ -53,9 +60,7 @@
     [
       #text(font: format.heading-font, weight: "bold", size: format.cover-title-size, fill: colors.ink)[#title]
       #v(0.4em, weak: true)
-      #text(size: format.cover-meta-size, fill: colors.ink-mid)[
-        Version #topic-version · verified #last-verified
-      ]
+      #text(size: format.cover-meta-size, fill: colors.ink-mid)[#meta-line]
       #v(0.35em, weak: true)
       #text(size: format.cover-meta-size, fill: colors.ink-mid)[#summary]
     ],
@@ -63,13 +68,16 @@
 }
 
 // --- Staleness notice -----------------------------------------------------
-#let staleness-notice(days) = block(
+// `age` arrives pre-formatted ("2 years") from formatVerificationAge in
+// src/config/cheatsheet-schema.ts, which the web page uses too — one
+// wording, both outputs, and no date arithmetic duplicated in Typst.
+#let staleness-notice(age) = block(
   fill: colors.panel,
   inset: 8pt,
   width: 100%,
   stroke: (left: 3pt + colors.ink),
   breakable: false,
-  [#text(weight: "bold")[Warning:] Last verified #days days ago — may not reflect current behavior.],
+  [#text(weight: "bold")[Warning:] Last verified #age ago — may not reflect current behavior.],
 )
 
 // --- Main entry -----------------------------------------------------------
@@ -81,7 +89,7 @@
   topic-version: "",
   last-verified: "",
   stale: false,
-  stale-days: 0,
+  stale-age: "",
   body-path: none,
 ) = {
   set document(title: title, author: "sokurenko.dev", keywords: ("cheat sheet", title), date: none)
@@ -156,7 +164,7 @@
   pagebreak()
 
   if stale {
-    staleness-notice(stale-days)
+    staleness-notice(stale-age)
     v(1em)
   }
 
