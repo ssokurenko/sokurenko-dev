@@ -38,23 +38,36 @@ const ariaLabel = `Download the free ${label} PDF for ${device}, ${pages} pages,
 	aria-label={ariaLabel}
 >
 	<span class="pdf-download-icon" aria-hidden="true">
-		{/* Inlined download glyph (arrow into tray). Inline rather than an
-		    <img>/sprite so it inherits currentColor on hover and costs no
-		    extra request — spec 09's budget allows no third-party assets. */}
-		<svg
-			viewBox="0 0 24 24"
-			width="20"
-			height="20"
-			fill="none"
-			stroke="currentColor"
-			stroke-width="2"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			focusable="false"
-		>
-			<path d="M12 3v11" />
-			<path d="M7.5 9.5 12 14l4.5-4.5" />
-			<path d="M4 16.5v2.5A1.5 1.5 0 0 0 5.5 20.5h13a1.5 1.5 0 0 0 1.5-1.5v-2.5" />
+		{/* A PDF file mark — page with a folded corner, plus a PDF badge —
+		    rather than a generic download arrow: what is on offer is the
+		    file type, and the "Free download" lede above already says the
+		    link downloads. Drawn here, not Adobe's trademarked logo, and
+		    inline rather than an <img>/sprite so it inherits currentColor
+		    on hover and costs no request (spec 09 allows no third-party
+		    assets). `textLength` pins the badge word's width so a wider
+		    system font can't push it past the badge. */}
+		<svg viewBox="0 0 24 24" width="34" height="34" fill="none" focusable="false">
+			<path
+				d="M14.5 2.75H7A2.25 2.25 0 0 0 4.75 5v14A2.25 2.25 0 0 0 7 21.25h10A2.25 2.25 0 0 0 19.25 19V7.5z"
+				stroke="currentColor"
+				stroke-width="1.7"
+				stroke-linejoin="round"
+			/>
+			<path d="M14.5 2.75V7.5h4.75" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+			<rect x="2.25" y="12.4" width="13.5" height="7.1" rx="1.8" fill="currentColor" />
+			<text
+				x="9"
+				y="17.85"
+				text-anchor="middle"
+				textLength="9.6"
+				lengthAdjust="spacingAndGlyphs"
+				font-size="5.4"
+				font-weight="700"
+				letter-spacing="0.15"
+				fill="var(--icon-knockout)"
+			>
+				PDF
+			</text>
 		</svg>
 	</span>
 	<span class="pdf-download-text">
@@ -106,29 +119,40 @@ const ariaLabel = `Download the free ${label} PDF for ${device}, ${pages} pages,
 	}
 
 	.pdf-download-icon {
+		/* The badge word is knocked out of the filled badge, so it has to be
+		   painted in whatever sits behind it — with no tile, that is the
+		   button's own surface, which fills with accent-low on hover.
+		   Painting it rather than leaving it transparent is what keeps the
+		   letters legible over the page outline behind them. */
+		--icon-knockout: var(--sl-color-bg);
+
 		display: grid;
 		place-items: center;
 		flex-shrink: 0;
-		inline-size: 2rem;
-		block-size: 2rem;
-		border-radius: 8px;
-		background: var(--sl-color-accent-low);
 		color: var(--sl-color-accent-high);
-		transition:
-			background-color 120ms ease,
-			color 120ms ease;
+		/* The badge word is small by necessity at this size; system-ui keeps
+		   it crisp and costs no font request. */
+		font-family: var(--site-font-system, system-ui);
 	}
 
 	.pdf-download:hover .pdf-download-icon,
 	.pdf-download:focus-visible .pdf-download-icon {
-		background: var(--sl-color-accent);
-		color: var(--on-accent);
+		--icon-knockout: var(--sl-color-accent-low);
+	}
+
+	/* Both fills resolve to the system canvas here, so the knockout follows
+	   it or the word disappears into the badge. */
+	@media (forced-colors: active) {
+		.pdf-download-icon,
+		.pdf-download:hover .pdf-download-icon,
+		.pdf-download:focus-visible .pdf-download-icon {
+			--icon-knockout: Canvas;
+		}
 	}
 
 	/* Motion is decoration here; the color and pill changes carry the state. */
 	@media (prefers-reduced-motion: reduce) {
-		.pdf-download,
-		.pdf-download-icon {
+		.pdf-download {
 			transition: none;
 		}
 		.pdf-download:hover,

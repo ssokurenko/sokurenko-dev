@@ -1,15 +1,19 @@
 /* Headings and the site title use the system font stack — no web font
-   request, no render-blocking load, native on every platform. */
+   request, no render-blocking load, native on every platform. Exposed as a
+   variable because components need it too (the PDF badge glyph in
+   PdfDownloadButton draws text inside an SVG). */
 .site-title,
 h1,
 h2 {
-	font-family: system-ui, -apple-system, 'system-ui', 'Segoe UI', Roboto,
-		Ubuntu, Oxygen, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-		Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-		'Segoe UI Symbol';
+	font-family: var(--site-font-system);
 }
 
 :root {
+	--site-font-system: system-ui, -apple-system, 'system-ui', 'Segoe UI',
+		Roboto, Ubuntu, Oxygen, Cantarell, 'Fira Sans', 'Droid Sans',
+		'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
+		'Segoe UI Emoji', 'Segoe UI Symbol';
+
 	/* LinkedIn brand blues: https://www.designpieces.com/palette/linkedin-color-palette-hex-and-rgb/ */
 	--sl-color-accent-low: #004182; /* Congress Blue */
 	--sl-color-accent: #0a66c2; /* Science Blue */
