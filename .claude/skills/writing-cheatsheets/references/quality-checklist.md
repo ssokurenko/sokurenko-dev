@@ -7,7 +7,7 @@ Work top to bottom. Do not set `lastVerified` until everything above it passes.
 - [ ] The sheet covers exactly one topic
 - [ ] Out-of-scope areas were consciously decided and belong to other sheets
 - [ ] Topics are sequenced so each one only depends on concepts already covered above it
-- [ ] Topic is narrow enough to stay under ~800 words
+- [ ] Topic is narrow enough to stay under ~1000 words (a guideline, not a gate — a topic that genuinely needs more sections gets them)
 
 ## 2. Structure
 

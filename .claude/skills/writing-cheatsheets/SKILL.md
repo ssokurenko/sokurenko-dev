@@ -192,9 +192,11 @@ Non-negotiable. A wrong cheat sheet is worse than no cheat sheet, because it is 
 ## Before you finish
 
 ```bash
-npm run lint                    # must be zero errors AND zero warnings
+npm run lint                    # must be zero errors
 npm run pdf:dev -- <slug>       # build both PDFs
 ```
+
+**Zero errors is the gate.** Clear warnings too — except `word-count`, which is a guideline at 1000 words. Cut padding to meet it, never a section the topic actually needs, and never by compressing prose into telegraphese. A sheet with 7+ topic sections runs long by construction; that is fine, and it is not a reason to stall or to restructure the sheet.
 
 Then open both PDFs and check:
 

@@ -29,9 +29,13 @@ export const MAX_SUMMARY_LENGTH = 160;
 /**
  * A cheat sheet is compact by design — see specs/00-product-overview.md.
  * This is a warning, not a hard cap: cut before padding, but don't force
- * garbled prose just to hit a number.
+ * garbled prose, and never drop a section the topic needs, just to hit a
+ * number. Raised from 800 once sheets with 7+ topic sections landed — at
+ * the skill's prescribed shape (table + prose + callout per section) 800
+ * only ever fit six sections, so the number was pushing structure rather
+ * than trimming padding.
  */
-export const WARN_WORD_COUNT = 800;
+export const WARN_WORD_COUNT = 1000;
 
 export const STALENESS_WARNING_DAYS = 180;
 

@@ -82,7 +82,7 @@ There is no "At a glance" mega-table and no separate "Common errors" section. Ev
 | Heading depth | `###` | error |
 | List nesting | 1 level | error |
 | Topic sections | 4–9 | warning |
-| Total words | 800 | warning |
+| Total words | 1000 | warning |
 | `lastVerified` age | 180 days | warning |
 | `summary` length | 160 chars | error |
 
@@ -109,7 +109,7 @@ All fail the build:
 1. Code line 48–52 chars
 2. Table > 6 rows — split the section, it's covering too much for a "glance"
 3. `lastVerified` > 180 days ago
-4. Sheet > 800 words
+4. Sheet > 1000 words
 5. Fewer than 4 or more than 9 topic sections
 
-Ship with zero errors **and** zero warnings.
+Ship with zero errors. Warnings 1–3 and 5 are worth clearing. **Word count is a guideline, not a gate** — clear it by cutting padding, never by deleting a section the topic needs or by compressing prose into telegraphese. A sheet that legitimately runs long ships long.

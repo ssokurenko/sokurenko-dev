@@ -143,4 +143,4 @@ deep-equality helper.
 - **`Object.is` gets a 2-row, 3-column comparison table** rather than prose, because two operators × two edge cases is exactly what a table is for — four facts, instantly scannable.
 - **`> **Warning:**` on `==`**, not `Gotcha`, because using `==` carelessly causes real defects rather than momentary confusion — matches the "does it cost time or cause harm" test in `SKILL.md`.
 - **The old version of this example** had a fifth section, "Common errors," with a 4-row table repeating the `NaN` and reference-equality mistakes already covered above. It's gone — those exact facts now live as callouts in the sections that cause them, which is the whole point of this revision.
-- **Word count is ~230**, comfortably under the 800-word guideline. A beginner topic this size should be short; padding it out would be the anti-pattern the skill warns against.
+- **Word count is ~230**, comfortably under the 1000-word guideline. A beginner topic this size should be short; padding it out would be the anti-pattern the skill warns against.
