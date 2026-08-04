@@ -38,6 +38,9 @@ const FIXTURE_SQL = `
   CREATE TABLE orders (id INTEGER PRIMARY KEY, customer_id INTEGER, total REAL);
   CREATE TABLE employees (name TEXT, dept TEXT, salary REAL);
   CREATE TABLE accounts (id INTEGER PRIMARY KEY, balance REAL);
+  -- Deduplication ledger for the idempotent-consumer example in
+  -- foundations/queuing-systems.
+  CREATE TABLE processed (job_id TEXT PRIMARY KEY);
   INSERT INTO customers VALUES (1, 'Alice'), (2, 'Bob');
   INSERT INTO orders VALUES (1, 1, 150), (2, 1, 40), (3, 2, 200);
   INSERT INTO employees VALUES
