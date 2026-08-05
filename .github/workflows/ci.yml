@@ -70,7 +70,7 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: >
-            --base-url "file://$GITHUB_WORKSPACE/dist/"
+            --base "file://$GITHUB_WORKSPACE/dist/"
             --no-progress
             'dist/**/*.html'
           fail: true

@@ -16,7 +16,7 @@ function run(script: string, args: string[] = []) {
 // screenshot rendering, and QR decoding — well within vitest's default
 // 5s on a warm local machine, but a cold CI runner can comfortably
 // exceed that (observed: a passing 6.4s run killed at the 5s default).
-const PDF_TEST_TIMEOUT = 60_000;
+const PDF_TEST_TIMEOUT = 120_000;
 
 describe('pdf pipeline', () => {
   it(
