@@ -11,7 +11,7 @@ cheatsheet:
       url: https://scrumguides.org/scrum-guide.html
     - label: Scrum Guides — changes between the 2017 and 2020 guides
       url: https://scrumguides.org/revisions.html
-  lastVerified: 2026-08-03
+  lastVerified: 2026-08-06
   difficulty: beginner
   tags: [agile, scrum, process, teamwork, sprint]
 ---
