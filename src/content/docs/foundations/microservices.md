@@ -3,7 +3,7 @@ title: Microservices architecture
 description: Service boundaries, data ownership, sagas, failure handling, tracing and contracts — the architectural style and the premium it charges.
 cheatsheet:
   slug: microservices
-  section: practices
+  section: foundations
   summary: Boundaries, data ownership, sagas, resilience, tracing and contracts — plus an honest account of what the style costs.
   topicVersion: "N/A"
   verifiedAgainst:
