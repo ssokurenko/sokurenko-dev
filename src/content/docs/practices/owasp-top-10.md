@@ -262,11 +262,15 @@ by design. Test misuse cases alongside the happy path — that is where
 an unbounded flow shows itself.
 
 ```ts
+declare function hold(
+  req: { seats: number },
+): Promise<{ status: number }>;
+
 // Test the abuse case, not just the flow.
-test("seat hold is capped", async () => {
-  const res = await hold({ seats: 500 });
-  expect(res.status).toBe(400);
-});
+const res = await hold({ seats: 500 });
+if (res.status !== 400) {
+  throw new Error("seat hold is uncapped");
+}
 ```
 
 > **Gotcha:** A pen test finds implementation bugs; it rarely finds a
@@ -292,7 +296,7 @@ use the platform's session manager, issue a fresh high-entropy ID after
 any privilege change, and invalidate server-side on logout and timeout.
 Validate the JWT `aud` and `iss` claims and scopes.
 
-```ts
+```js
 // Session fixation: reusing the pre-login ID
 // lets whoever planted it ride in with you.
 req.session.regenerate(() => {
@@ -325,7 +329,7 @@ logic (CWE-636), leaked error detail (CWE-209), and null dereferences
 back rather than half-recovering, and keep a global handler beneath
 that as the net.
 
-```ts
+```js
 try {
   await charge(order);
 } catch (err) {
