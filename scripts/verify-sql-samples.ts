@@ -30,6 +30,15 @@ const CONTENT_ROOT = path.join(REPO_ROOT, 'src/content/docs');
 
 const processor = unified().use(remarkParse).use(remarkGfm);
 
+// Sheets whose `sql` blocks are deliberately engine-specific and cannot
+// execute on SQLite — a Postgres sheet's value *is* the syntax SQLite
+// lacks (jsonb, GIN, timestamptz, VACUUM, EXPLAIN options). Running them
+// here would only prove SQLite isn't Postgres, so they are verified
+// against the vendor documentation cited in their `verifiedAgainst`
+// frontmatter instead. Keep this list as short as it can possibly be:
+// every entry is a sheet nothing mechanically checks.
+const ENGINE_SPECIFIC = new Set(['data/postgresql.md']);
+
 // Minimal schema covering the tables the catalog's SQL examples assume
 // exist. Extend this as new SQL-containing sheets are added.
 const FIXTURE_SQL = `
@@ -61,6 +70,8 @@ async function main() {
   const bySourceFile = new Map<string, Sample[]>();
 
   for (const file of files) {
+    if (ENGINE_SPECIFIC.has(path.relative(CONTENT_ROOT, file))) continue;
+
     const raw = readFileSync(file, 'utf8');
     const { content } = matter(raw);
     const lineOffset = raw.slice(0, raw.indexOf(content)).split('\n').length - 1;
