@@ -22,6 +22,7 @@ cheatsheet:
   tags: [react, hooks, context, state, jsx]
   related:
     - frontend/react-advanced
+    - frontend/nextjs
     - languages/typescript
   pdf: true
 ---

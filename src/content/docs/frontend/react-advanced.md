@@ -30,6 +30,7 @@ cheatsheet:
   tags: [react, server-components, suspense, actions, streaming, transitions]
   related:
     - frontend/react
+    - frontend/nextjs-advanced
     - languages/typescript
 ---
 
@@ -40,7 +41,8 @@ away from the browser, and send their **output** rather than their
 code; Client Components ship, hydrate, and hold state. `'use client'`
 and `'use server'` are the two doors between those halves, Suspense
 marks where output may arrive late, and Actions carry writes back
-across. Every feature below is a rule about crossing that boundary.
+across. Every feature below is a rule about crossing that boundary,
+and a framework such as Next.js is what wires it up.
 
 ## Server Components
 
