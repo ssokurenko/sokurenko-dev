@@ -140,6 +140,7 @@ function Counter() {
 | *(omitted)* | After every render |
 | `[]` | Once, after the first render |
 | `[a, b]` | After any render where `a` or `b` changed |
+| Cleanup | Before every re-run, and on unmount |
 
 An Effect synchronizes a component with an external system — a
 subscription, a timer, a non-React widget. It runs after the browser
@@ -159,6 +160,46 @@ function Ticker() {
     return () => clearInterval(id);
   }, []);
   return <p>{count}</p>;
+}
+```
+
+Cleanup is not only for unmounting. With a non-empty dependency array
+it also runs **before each re-run**, and that is what makes debouncing
+a three-line Effect: every keystroke cancels the timer the previous
+keystroke started, so only the last one ever fires.
+
+```tsx
+import { useState, useEffect } from "react";
+
+function useDebounced<T>(value: T, ms = 300) {
+  const [out, setOut] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setOut(value), ms);
+    // Cancels the pending timer on every change.
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return out;
+}
+```
+
+The input stays instant because it renders `q`; only the debounced
+copy reaches the Effect that queries the server.
+
+```tsx
+import { useState, useEffect } from "react";
+declare function useDebounced(v: string): string;
+export function Search() {
+  const [q, setQ] = useState("");
+  const query = useDebounced(q);
+  useEffect(() => {
+    if (query) fetch(`/search?q=${query}`);
+  }, [query]);
+  return (
+    <input
+      value={q}
+      onChange={(e) => setQ(e.target.value)}
+    />
+  );
 }
 ```
 
@@ -206,27 +247,56 @@ state would re-render on every write, so a ref is the only box that
 fits — it is the function-component version of an instance field.
 
 ```tsx
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 function Stopwatch() {
   const [n, setN] = useState(0);
-  // Survives renders; writing it never renders.
   const id = useRef<number>(undefined);
+  const tick = () => setN((v) => v + 1);
+  const pause = () => clearInterval(id.current);
   const start = () => {
-    id.current = window.setInterval(() => {
-      setN((v) => v + 1);
-    }, 1000);
+    pause(); // never run two timers at once
+    id.current = setInterval(tick, 1000);
   };
-  useEffect(() => {
-    return () => clearInterval(id.current);
-  }, []);
-  return <button onClick={start}>{n}</button>;
+  return (<><p>{n} seconds</p>
+    <button onClick={start}>Start</button>
+    <button onClick={pause}>Pause</button>
+  </>);
 }
 ```
 
-Read and write refs in handlers and Effects, never during render —
-that is what keeps rendering repeatable. Refs are about
-**remembering** a value; `useCallback` below is about **identity**, and
-the two get confused because both survive re-renders.
+The count is state, so it renders; the interval id is a ref, so
+`pause` can reach the running timer without a render ever having
+carried it. Clearing on unmount belongs in an Effect cleanup, exactly
+as the `Ticker` above does it.
+
+Both jobs meet in the click-outside pattern behind every dropdown and
+modal. The ref holds the panel's DOM node so the listener can ask "was
+this click inside me?", and the Effect owns the listener: registered on
+mount, removed in the cleanup. Skip that cleanup and every open-close
+cycle leaves another listener on `document`, all of them still firing.
+
+```tsx
+import { useRef, useEffect, useState } from "react";
+function Menu() {
+  const box = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    const away = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!box.current?.contains(t)) setOpen(false);
+    };
+    document.addEventListener("click", away);
+    return () =>
+      document.removeEventListener("click", away);
+  }, []);
+  return <div ref={box}>{open && "Menu"}</div>;
+}
+```
+
+Read and write refs in handlers and Effects, never during render — that
+is what keeps rendering repeatable. Refs are about **remembering** a
+value; `useCallback` below is about **identity**, and the two get
+confused because both survive re-renders.
 
 > **Gotcha:** If the UI must reflect a value, it belongs in state, not
 > a ref. A ref change is invisible until something else happens to

@@ -4,11 +4,13 @@ import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const SCRIPT = path.resolve(import.meta.dirname, '../scripts/lint-cheatsheets.ts');
+const REPO_ROOT = path.resolve(import.meta.dirname, '..');
+const SCRIPT = path.join(REPO_ROOT, 'scripts/lint-cheatsheets.ts');
+const TSX = path.join(REPO_ROOT, 'node_modules/.bin/tsx');
 
 function runLint(root: string) {
   try {
-    const out = execFileSync('npx', ['tsx', SCRIPT, '--root', root, '--format', 'json'], {
+    const out = execFileSync(TSX, [SCRIPT, '--root', root, '--format', 'json'], {
       encoding: 'utf8',
     });
     return { exitCode: 0, findings: JSON.parse(out) as { rule: string; severity: string }[] };
@@ -16,6 +18,10 @@ function runLint(root: string) {
     return { exitCode: e.status ?? 1, findings: JSON.parse(e.stdout) as { rule: string; severity: string }[] };
   }
 }
+
+// Each case spawns the linter; generous ceiling so a loaded runner
+// cannot trip the 5s default (see pdf-pipeline.test.ts).
+const LINT_TEST_TIMEOUT = 30_000;
 
 const VALID_FRONTMATTER = `---
 title: Widgets
@@ -89,7 +95,7 @@ More prose, building on the basics above.
     const errors = findings.filter((f) => f.severity === 'error');
     expect(errors).toEqual([]);
     expect(exitCode).toBe(0);
-  });
+  }, LINT_TEST_TIMEOUT);
 
   it('flags every category of violation in a broken sheet', () => {
     const dir = path.join(root, 'broken', 'languages');
@@ -130,7 +136,7 @@ Visit https://example.com/bare for more.
     expect(rules).toContain('table-columns'); // 4 columns
     expect(rules).toContain('callout-label'); // bad label
     expect(rules).toContain('bare-url'); // bare URL
-  });
+  }, LINT_TEST_TIMEOUT);
 
   it('flags duplicate slugs and dangling related references', () => {
     const dir = path.join(root, 'cross', 'languages');
@@ -173,5 +179,5 @@ Prose.
     const rules = new Set(findings.map((f) => f.rule));
     expect(rules).toContain('duplicate-slug');
     expect(rules).toContain('dangling-related');
-  });
+  }, LINT_TEST_TIMEOUT);
 });
