@@ -15,6 +15,8 @@ cheatsheet:
       url: https://react.dev/reference/react/useEffect
     - label: Rendering Lists
       url: https://react.dev/learn/rendering-lists
+    - label: Passing Data Deeply with Context
+      url: https://react.dev/learn/passing-data-deeply-with-context
     - label: You Might Not Need an Effect
       url: https://react.dev/learn/you-might-not-need-an-effect
   lastVerified: 2026-08-11
@@ -167,61 +169,110 @@ function Ticker() {
 
 ## useRef
 
-| Syntax | Meaning |
+| Use a ref for | Why |
 |---|---|
-| `useRef(initial)` | A mutable box; `.current` holds it |
-| `ref={myRef}` | Attaches the box to a DOM node |
+| A DOM node | Focus, measure, scroll, read a field |
+| A timer or subscription id | Survives renders, must not cause one |
+| The previous value of a prop | Comparison without re-rendering |
+| Anything the user sees | Wrong — that is state |
 
-Writing `ref.current` never triggers a re-render, so refs hold what a
-component needs to remember but not display: a timer id, a previous
-value, a DOM node to focus. Read or write them in handlers and Effects,
-never during render — that is what makes rendering repeatable.
+Refs do two different jobs. The first is a **handle to a DOM node**:
+pass the ref to an element and React writes the node into `.current`
+once it is on screen, which is how you focus an input, read an
+uncontrolled field, scroll something into view, or measure it.
 
 ```tsx
 import { useRef, useEffect } from "react";
-
-function TextInput() {
-  const ref = useRef<HTMLInputElement>(null);
+function SearchBox() {
+  const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    ref.current?.focus();
+    input.current?.focus(); // focus on mount
   }, []);
-  return <input ref={ref} />;
+  const read = () => {
+    console.log(input.current?.value);
+  };
+  return (
+    <form onSubmit={read}>
+      <input ref={input} name="q" />
+    </form>
+  );
 }
 ```
+
+The second job is a **mutable value that survives re-renders without
+being one**: a timer id, a WebSocket, a previous value, an "already
+submitted" flag. A plain variable is recreated on every render and
+state would re-render on every write, so a ref is the only box that
+fits — it is the function-component version of an instance field.
+
+```tsx
+import { useRef, useState, useEffect } from "react";
+function Stopwatch() {
+  const [n, setN] = useState(0);
+  // Survives renders; writing it never renders.
+  const id = useRef<number>(undefined);
+  const start = () => {
+    id.current = window.setInterval(() => {
+      setN((v) => v + 1);
+    }, 1000);
+  };
+  useEffect(() => {
+    return () => clearInterval(id.current);
+  }, []);
+  return <button onClick={start}>{n}</button>;
+}
+```
+
+Read and write refs in handlers and Effects, never during render —
+that is what keeps rendering repeatable. Refs are about
+**remembering** a value; `useCallback` below is about **identity**, and
+the two get confused because both survive re-renders.
 
 > **Gotcha:** If the UI must reflect a value, it belongs in state, not
 > a ref. A ref change is invisible until something else happens to
-> re-render the component, which makes the bug look intermittent.
+> re-render the component, which makes the bug look intermittent — the
+> number is right in the console and stale on screen.
 
 ## useMemo and useCallback
 
-| Syntax | Caches |
-|---|---|
-| `useMemo(fn, deps)` | A computed **value** |
-| `useCallback(fn, deps)` | A **function** reference |
+| Hook | Hands back | Changes when |
+|---|---|---|
+| `useMemo(fn, deps)` | The value `fn()` returned | A dep changes |
+| `useCallback(fn, deps)` | The function `fn` itself | A dep changes |
+| `useRef(v)` | The same box, always | Never — you assign it |
 
-Both skip work until a dependency changes, and `useCallback(fn, deps)`
-is exactly `useMemo(() => fn, deps)` — the same tool specialized for
-functions passed to memoized children. They are performance
-adjustments, not correctness tools: an app should be correct with every
-one of them deleted.
+`useCallback(fn, deps)` is exactly `useMemo(() => fn, deps)`: one
+caches a result, the other caches the function you would have called.
+Reach for `useMemo` when a computation is measurably expensive, or when
+a child needs a stable object or array; reach for `useCallback` only
+when a function is handed to a `memo()`-wrapped child or listed in an
+Effect's dependency array, because a fresh function every render
+defeats both. Reach for `useRef` when you need a stable *slot* to write
+into rather than a stable *value* to read. None of them is required for
+correctness — an app should still work with every one deleted.
 
 ```tsx
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
-function List({ items }: { items: string[] }) {
-  const sorted = useMemo(
-    () => items.slice().sort(),
-    [items],
-  );
-  return <ul>{sorted.join(", ")}</ul>;
+declare function Child(p: {
+  items: string[];
+  onPick: (s: string) => void;
+}): null;
+function Parent({ items }: { items: string[] }) {
+  // Same array unless items changes.
+  const sorted = useMemo(() => [...items], [items]);
+  // Same function on every single render.
+  const onPick = useCallback((s: string) => {
+    console.log(s);
+  }, []);
+  return <Child items={sorted} onPick={onPick} />;
 }
 ```
 
-> **Tip:** Memoize what you have measured to be expensive, or what
-> feeds a `memo()`-wrapped child. Wrapping everything adds allocation
-> and dependency-array bugs for no gain — and the React Compiler now
-> does most of this automatically.
+> **Gotcha:** `useCallback` on its own changes nothing. The child
+> re-renders anyway unless it is wrapped in `memo()`, so the hook only
+> pays off at a memoization boundary — and the React Compiler now
+> inserts most of these for you.
 
 ## useReducer
 
@@ -260,39 +311,73 @@ function Counter() {
 
 ## Sharing state with context
 
-| Syntax | Meaning |
+| Piece | What it does |
 |---|---|
-| `createContext(default)` | Creates a context object |
-| `<Context value={v}>` | Provides `v` to descendants |
-| `useContext(Context)` | Reads the nearest provider |
+| `createContext(default)` | Creates the channel and its fallback |
+| `<Ctx value={v}>` | Publishes `v` to everything below it |
+| `useContext(Ctx)` | Reads the nearest provider above |
+| The provider's state | Where the value actually lives |
 
-Context lets a deep component read a value without every layer in
-between forwarding it as a prop. From React 19, `<Context>` is itself
-the provider — `<Context.Provider>` still works but is no longer
-required. Context solves prop drilling, not state management: the value
-still lives in some component's state.
+Context is a channel, not a store. A provider publishes one value to
+its entire subtree, and any descendant reads it with `useContext` no
+matter how deep it sits or what components stand in between — it always
+gets the nearest provider above it. The value itself still lives in
+some component's state; context only spares you from threading it down
+by hand. Publish an updater beside the value and one component can
+change what a completely different component displays, with neither
+knowing the other exists.
 
 ```tsx
 import { createContext, useContext } from "react";
-
-const ThemeContext = createContext("light");
-
-function Label() {
-  return <p>{useContext(ThemeContext)}</p>;
+const ThemeCtx = createContext({
+  theme: "light",
+  toggle: () => {},
+});
+// Displays the value.
+function Display() {
+  const { theme } = useContext(ThemeCtx);
+  return <p>Theme: {theme}</p>;
 }
-function App() {
+// Changes the same value.
+function Toggle() {
+  const { toggle } = useContext(ThemeCtx);
+  return <button onClick={toggle}>Switch</button>;
+}
+```
+
+Threading a prop through layers that never use it is **prop drilling**,
+and context is not the first cure for it — composition usually is.
+Rather than `<Layout posts={posts} />` forwarding data inward, pass the
+finished JSX as children: `<Layout><Posts posts={posts} /></Layout>`.
+The middle component now takes no prop at all, so it cannot be broken
+by a change to data it never touches, and the tree still reads
+top-to-bottom. Context earns its keep for genuinely ambient values —
+theme, current account, locale, routing — that distant components in
+different branches all need.
+
+```tsx
+import { useState, type Context } from "react";
+type Ctx = { theme: string; toggle: () => void };
+declare const ThemeCtx: Context<Ctx>;
+declare function Display(): null;
+declare function Toggle(): null;
+export function App() {
+  const [theme, setTheme] = useState("light");
+  const toggle = () => setTheme("dark");
   return (
-    <ThemeContext value="dark">
-      <Label />
-    </ThemeContext>
+    <ThemeCtx value={{ theme, toggle }}>
+      <Display />
+      <Toggle />
+    </ThemeCtx>
   );
 }
 ```
 
-> **Gotcha:** Every consumer re-renders when the value changes, even
-> ones wrapped in `memo()`. An object literal in the provider is a new
-> value on every parent render, so wrap it in `useMemo` or the whole
-> subtree re-renders for unrelated reasons.
+> **Gotcha:** Every component reading a context re-renders when the
+> value changes, `memo()` included. The object literal in
+> `value={{ theme, toggle }}` is new on every render of the provider —
+> harmless while the provider re-renders only for `theme`, a problem
+> the moment it also holds unrelated state. Wrap it in `useMemo` then.
 
 ## Custom hooks
 
