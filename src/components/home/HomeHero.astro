@@ -2,7 +2,41 @@
 import PopularChips from './PopularChips.astro';
 ---
 
-<div class="home-hero">
+{/*
+	Peel scaffold — specs are not amended for this yet; see src/vendor/canvasui/README.md.
+	What ships in the HTML is exactly the hero as it was: the under layer and both
+	canvases are `hidden`, so no-JS visitors, Safari, Firefox, axe-core and Lighthouse
+	all see the plain markup below and nothing else. The script at the bottom of this
+	file rewires it into a Canvas UI peel only where the (Chrome-flag-only)
+	HTML-in-Canvas API exists, which today is almost nobody. That is deliberate.
+*/}
+<div class="home-hero-peel">
+	{/*
+		`not-content` is Starlight's own opt-out: every .sl-markdown-content rule
+		is written as :not(:where(.not-content *)), so this keeps the blockquote
+		from picking up the markdown border-and-indent treatment meant for prose
+		inside a sheet.
+	*/}
+	<div class="home-hero-under not-content" hidden>
+		<figure class="home-hero-quote">
+			<blockquote>
+				<p>
+					“Programming isn’t about what you know; it’s about what
+					you can figure out.”
+				</p>
+			</blockquote>
+			<figcaption>
+				Chris Pine, <cite>Learn to Program</cite>
+			</figcaption>
+		</figure>
+	</div>
+	{/* layoutsubtree lets the browser lay out and paint this canvas's DOM children —
+	    the hero is moved in here at upgrade time, never authored inside it.
+	    Spread because the attribute is experimental and absent from
+	    CanvasHTMLAttributes, so writing it literally fails `astro check`. */}
+	<canvas class="home-hero-source" {...{ layoutsubtree: 'true' }} hidden></canvas>
+
+<div class="home-hero home-hero-content">
 	<div class="home-hero-copy">
 		{/*
 			Two tiers rather than one flat sentence: the noun says what the site
@@ -41,7 +75,133 @@ import PopularChips from './PopularChips.astro';
 	/>
 </div>
 
+	{/* Where the peeled sheet is drawn. Purely a rendering surface — the real,
+	    still-interactive HTML is the canvas above it. */}
+	<canvas class="home-hero-output" aria-hidden="true" hidden></canvas>
+</div>
+
 <style>
+	/* ---- Peel scaffold -------------------------------------------------------
+
+	   Every rule in this block is gated behind `.is-peeling`, which only the
+	   script adds, and only after it has confirmed the HTML-in-Canvas API is
+	   present. Un-upgraded, `.home-hero-peel` is an unstyled <div> wrapping the
+	   untouched hero, and the three extra layers are `hidden` — so the fallback
+	   is the plain hero, laid out exactly as it was before any of this existed.
+
+	   Keep it that way. An ungated rule here reaches every visitor on every
+	   browser, which is how the under layer once covered the whole hero. */
+
+	/* `display: none` for the hidden attribute comes from the UA stylesheet, so
+	   ANY author `display` — .home-hero-under sets `grid` — outranks it no
+	   matter the specificity. This guard is what actually keeps them hidden. */
+	.home-hero-under[hidden],
+	.home-hero-source[hidden],
+	.home-hero-output[hidden] {
+		display: none;
+	}
+
+	/* The peel box is sized to the hero's own content box rather than the full
+	   viewport, so a peel from the left starts at the headline instead of
+	   dragging 20rem of empty gutter across a wide screen first. Matches the
+	   .home-hero cap below on purpose — keep the two in step. */
+	.home-hero-peel.is-peeling {
+		position: relative;
+		max-width: 72rem;
+		margin-inline: auto;
+	}
+
+	/* Ungated on purpose — this one RESTORES the original layout rather than
+	   adding to it. Starlight's .sl-markdown-content spaces *every* descendant
+	   pair, not just direct children. On main the hero was that container's
+	   first child and so got no top margin; wrapped, it follows a canvas and
+	   picks up 1rem. Zeroing it is what makes the fallback identical to main —
+	   and when peeling it also keeps a margin from shifting an absolutely
+	   positioned canvas off its inset. */
+	.home-hero-peel > * {
+		margin: 0;
+	}
+
+	.is-peeling .home-hero-under,
+	.is-peeling .home-hero-source,
+	.is-peeling .home-hero-output {
+		position: absolute;
+		inset: 0;
+	}
+
+	.is-peeling .home-hero-under {
+		overflow: hidden;
+		display: grid;
+		align-items: center;
+		/* Anchored to the peeling edge: `reveal` only exposes a strip of this
+		   layer, and centred text would sit behind the part of the sheet that
+		   never lifts. */
+		justify-items: start;
+		padding-inline-start: 1.5rem;
+		background-color: var(--sl-color-gray-6);
+	}
+
+	.is-peeling .home-hero-quote {
+		/* Sized to sit inside the strip `reveal` actually exposes — see the
+		   option in the script below. Widen one and the other has to follow, or
+		   the attribution ends up hidden under the un-peeled sheet. */
+		max-inline-size: 26ch;
+		margin: 0;
+	}
+
+	.is-peeling .home-hero-quote blockquote {
+		margin: 0;
+		font-family: var(--site-font-system);
+		font-size: clamp(1rem, 1.5vw, 1.25rem);
+		font-weight: 600;
+		line-height: 1.45;
+		letter-spacing: -0.012em;
+		color: var(--sl-color-white);
+		/* Hangs the opening quote mark into the margin so the first line of
+		   text still aligns with the attribution below it. */
+		text-indent: -0.42em;
+		text-wrap: pretty;
+	}
+
+	.is-peeling .home-hero-quote blockquote p {
+		margin: 0;
+	}
+
+	.is-peeling .home-hero-quote figcaption {
+		margin-block-start: 0.9em;
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		color: var(--sl-color-gray-3);
+	}
+
+	.is-peeling .home-hero-quote cite {
+		font-style: italic;
+	}
+
+	/* Both canvases are decoration over live HTML: the source canvas hosts the
+	   real hero (which must stay clickable, so it re-enables events on its own
+	   child) and the output canvas is a pure paint surface. */
+	.is-peeling .home-hero-source,
+	.is-peeling .home-hero-output {
+		pointer-events: none;
+		width: 100%;
+		height: 100%;
+	}
+
+	/* `height: auto` is load-bearing — the wrapper takes its height *from* this
+	   element, so pinning it to 100% would make the two circular. */
+	.is-peeling .home-hero-content {
+		width: 100%;
+		height: auto;
+		pointer-events: auto;
+		/* The captured sheet is transparent wherever the hero has no ink, so
+		   without an opaque ground the TBD layer shows through the un-peeled
+		   sheet instead of only through the lifted corner. */
+		background-color: var(--sl-color-bg);
+	}
+
+	/* ---- Hero ---------------------------------------------------------------- */
+
 	.home-hero {
 		max-width: 72rem;
 		margin-inline: auto;
@@ -161,3 +321,106 @@ import PopularChips from './PopularChips.astro';
 		}
 	}
 </style>
+
+<script>
+	/**
+	 * Upgrades the hero into a Canvas UI peel — see src/vendor/canvasui/README.md.
+	 *
+	 * Every early return below leaves the DOM exactly as it was served, which is
+	 * the plain hero. That is the path virtually every visitor takes: the effect
+	 * needs the HTML-in-Canvas API, which today is Chrome behind a flag.
+	 */
+	type Paintable = HTMLCanvasElement & { requestPaint?: () => void };
+	type ElementImageContext = CanvasRenderingContext2D & {
+		drawElementImage?: (element: Element, x: number, y: number) => void;
+	};
+
+	/**
+	 * Deliberately duplicates the module's own `supportsHtmlInCanvas()` rather
+	 * than importing it: probing here means non-Chrome visitors never download
+	 * the peel chunk at all.
+	 */
+	function supportsHtmlInCanvas(): boolean {
+		const probe = document.createElement('canvas') as Paintable;
+		const ctx = probe.getContext('2d') as ElementImageContext | null;
+		return Boolean(
+			ctx &&
+				typeof ctx.drawElementImage === 'function' &&
+				typeof probe.requestPaint === 'function',
+		);
+	}
+
+	async function initPeel() {
+		const wrapper = document.querySelector<HTMLElement>('.home-hero-peel');
+		if (!wrapper) return;
+
+		const under = wrapper.querySelector<HTMLElement>('.home-hero-under');
+		const source = wrapper.querySelector<HTMLCanvasElement>('.home-hero-source');
+		const output = wrapper.querySelector<HTMLCanvasElement>('.home-hero-output');
+		const content = wrapper.querySelector<HTMLElement>('.home-hero-content');
+		if (!under || !source || !output || !content) return;
+
+		if (!supportsHtmlInCanvas()) return;
+
+		// The library's own reduced-motion handling only drops the animation
+		// damping — the sheet still swings to full amplitude under the cursor.
+		// Spec 04 keeps all motion inside no-preference, so the gate is here.
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		// The peel is driven entirely by cursor proximity, so on a touch device
+		// it can never engage — the visitor would pay for a WebGL layer over
+		// their hero and get nothing back. Phones are also where the JS and
+		// battery budgets bite hardest, so they keep the plain hero.
+		if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+		const { createPeel } = await import('../../vendor/canvasui/PeelVanilla');
+
+		// Everything in the scaffold's stylesheet is gated behind this class, so
+		// until it lands the wrapper is an unstyled div around the plain hero.
+		// It goes on before the measurement below, so the height is measured
+		// under the same box the peel will use.
+		wrapper.classList.add('is-peeling');
+
+		// Pin the height before moving the hero out of normal flow, otherwise the
+		// wrapper collapses to zero for a frame.
+		const syncHeight = () => {
+			wrapper.style.height = `${content.offsetHeight}px`;
+		};
+		syncHeight();
+
+		under.hidden = false;
+		source.hidden = false;
+		output.hidden = false;
+		// Moved, not re-rendered: the live nodes keep their state and the
+		// illustration is not re-fetched.
+		source.appendChild(content);
+
+		const peel = createPeel(
+			{ source, content, output, under },
+			{ side: 'left', mode: 'cursor', reveal: 400 },
+		);
+
+		if (!peel) {
+			// No WebGL2. Put everything back rather than leaving a blank box —
+			// dropping the class alone restores the plain-hero layout.
+			wrapper.insertBefore(content, output);
+			wrapper.classList.remove('is-peeling');
+			wrapper.style.height = '';
+			under.hidden = true;
+			source.hidden = true;
+			output.hidden = true;
+			return;
+		}
+
+		// The hero's height is fluid (clamped type, a breakpoint at 58rem), and
+		// nothing is left in flow to track it. No feedback loop: `content` is
+		// height: auto, so the wrapper height it produces never feeds back in.
+		const resizeObserver = new ResizeObserver(() => {
+			syncHeight();
+			peel.resize();
+		});
+		resizeObserver.observe(content);
+	}
+
+	void initPeel();
+</script>

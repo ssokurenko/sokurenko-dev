@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { SECTIONS } from './src/config/taxonomy.ts';
+import { ORIGIN_TRIAL_TOKENS } from './src/config/origin-trials.ts';
 import { rehypePagefindWeights } from './scripts/rehype-pagefind-weights.ts';
 
 // https://astro.build/config
@@ -31,6 +32,14 @@ export default defineConfig({
 			// Starlight's `head` so it lands on every page, `async` so
 			// it never blocks render.
 			head: [
+				// Chrome origin-trial tokens. Not a network request and not a
+				// third party — a token only tells the visitor's own browser it
+				// may run an experimental API on this origin. Empty by default,
+				// in which case nothing is emitted. See src/config/origin-trials.ts.
+				...ORIGIN_TRIAL_TOKENS.map(({ token }) => ({
+					tag: /** @type {const} */ ('meta'),
+					attrs: { 'http-equiv': 'origin-trial', content: token },
+				})),
 				{
 					tag: 'script',
 					attrs: {
