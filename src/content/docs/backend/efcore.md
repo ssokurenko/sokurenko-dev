@@ -21,6 +21,7 @@ cheatsheet:
   related:
     - backend/dotnet
     - languages/csharp
+    - languages/linq
 ---
 
 ## Mental model

@@ -16,7 +16,7 @@ cheatsheet:
   lastVerified: 2026-07-26
   difficulty: intermediate
   tags: [oop, generics, async, linq]
-  related: [languages/typescript]
+  related: [languages/typescript, languages/linq]
 ---
 
 ## Mental model
