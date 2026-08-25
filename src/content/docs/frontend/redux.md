@@ -27,6 +27,7 @@ cheatsheet:
   related:
     - frontend/react
     - frontend/react-advanced
+    - frontend/jotai
     - languages/typescript
 ---
 

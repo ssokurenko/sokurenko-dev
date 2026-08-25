@@ -29,6 +29,7 @@ cheatsheet:
   related:
     - frontend/react
     - frontend/redux
+    - frontend/jotai
     - frontend/nextjs
 ---
 
