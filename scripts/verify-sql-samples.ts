@@ -104,6 +104,20 @@ async function main() {
 
     for (const sample of samples) {
       try {
+        const stripped = sample.value
+          .replace(/'(?:[^']|'')*'/g, '')
+          .replace(/"(?:[^"]|"")*"/g, '')
+          .replace(/\[[^\]]*\]/g, '')
+          .replace(/`[^`]*`/g, '')
+          .replace(/\/\*[\s\S]*?\*\//g, '')
+          .replace(/--.*$/gm, '');
+
+        for (const statement of stripped.split(';')) {
+          if (/^\s*(ATTACH|PRAGMA)\b/i.test(statement)) {
+            throw new Error('Unsafe SQL statement rejected');
+          }
+        }
+
         db.exec(sample.value);
       } catch (err: any) {
         hadErrors = true;
