@@ -13,6 +13,10 @@ cheatsheet:
   difficulty: intermediate
   tags: [cli, ai, llm, claude, anthropic, claude-code]
   pdf: true
+  video:
+    youtube: lcQoFX2iEgI
+    title: "Claude Code Commands in 4 Minutes: Every Slash Command You Actually Need"
+    duration: "3:50"
 ---
 
 ## Mental model
