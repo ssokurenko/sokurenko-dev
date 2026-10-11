@@ -17,6 +17,12 @@ export default defineConfig({
 	markdown: {
 		rehypePlugins: [rehypePagefindWeights],
 	},
+	// Companion-video thumbnails (src/components/SheetVideo.astro). Fetched
+	// and re-encoded at build time and served from this origin — visitors'
+	// browsers never contact i.ytimg.com.
+	image: {
+		domains: ['i.ytimg.com'],
+	},
 	integrations: [
 		starlight({
 			title: 'SokurenkoDEV',
@@ -27,8 +33,10 @@ export default defineConfig({
 			// illustration rather than being its own asset.
 			favicon: '/illustrations/hero.svg',
 			// Google Analytics: the one deliberate exception to the
-			// site's zero-third-party-request policy — see
-			// specs/09-quality-bar.md#performance-budgets. Injected via
+			// site's zero-third-party-request-on-load policy — see
+			// specs/09-quality-bar.md#performance-budgets. (The YouTube
+			// player is the other, loaded only when a visitor presses play
+			// on a companion video — SheetVideo.astro.) Injected via
 			// Starlight's `head` so it lands on every page, `async` so
 			// it never blocks render.
 			head: [

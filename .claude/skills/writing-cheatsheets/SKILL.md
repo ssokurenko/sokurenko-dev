@@ -171,6 +171,10 @@ cheatsheet:
   difficulty: intermediate
   tags: [types, generics]
   related: [languages/javascript]
+  video:                    # optional — only if a companion video exists
+    youtube: tcUBahvsf7Y    # ID or any YouTube URL
+    title: Short human title, ≤ 100 chars
+    duration: "4:31"        # as YouTube shows it
 ---
 ```
 
@@ -178,6 +182,10 @@ Two fields deserve care:
 
 - **`slug` is permanent.** It's printed in every PDF footer and encoded in every cover QR code — including copies already sideloaded onto someone's reader. Renaming it orphans physical artifacts.
 - **`lastVerified` is a human assertion** that someone re-read the primary source. Set it only after you actually did. Never bump it to silence the staleness badge.
+
+And one optional field:
+
+- **`video` is a companion, never a source.** Add it only when a video covers the sheet's own scope — the page shows it as a click-to-play card under the title, the PDF says "Video walkthrough (5 min) — scan the code to watch." Don't list it in `verifiedAgainst` (primary sources only), and adding one is not a reason to touch `lastVerified`. Write `title` yourself — YouTube's titles are tuned for search and run long. Never put a video in the Markdown body. Run `npm run verify:videos` to confirm it is public and embeddable.
 
 ## Verification
 

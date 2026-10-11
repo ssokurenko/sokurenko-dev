@@ -28,6 +28,7 @@ The complete constrained-Markdown vocabulary. Authoritative source: `specs/02-co
 | `####`, `#####`, `######` | Unnavigable; won't fit a small-Kindle ToC; signals the sheet needs restructuring | Restructure into H2/H3 |
 | MDX / JSX components | Typst cannot render JSX — the PDF silently loses the content | An allowed construct, or a Starlight component override |
 | Images, diagrams, screenshots | Illegible at 4.12″ grayscale; unsearchable; uncopyable; inaccessible | A table or a code block |
+| Video embeds (`<iframe>`, YouTube links as a "watch this" section) | Raw HTML; a PDF can't play it | `cheatsheet.video` frontmatter — the page renders the card, the PDF prints one line |
 | Raw HTML | Bypasses the linter and breaks Typst | An allowed construct |
 | Tables > 3 columns, or > 6 rows | Overflows the 253 pt small-format text block; a table this big isn't a "glance" anymore | Split into two tables, or a definition-style list |
 | Nested tables | No reliable Typst mapping | Restructure |

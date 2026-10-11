@@ -40,3 +40,12 @@ export const WARN_WORD_COUNT = 1000;
 export const STALENESS_WARNING_DAYS = 180;
 
 export const CALLOUT_LABELS = ['Gotcha', 'Note', 'Tip', 'Warning'] as const;
+
+/**
+ * Companion video title (`cheatsheet.video.title`). It is the card's
+ * visible title and the play link's accessible name, so it is authored
+ * rather than copied from YouTube, whose search-tuned titles run long.
+ * The card clamps to two lines; this keeps the full name sane for
+ * screen readers too.
+ */
+export const MAX_VIDEO_TITLE_LENGTH = 100;

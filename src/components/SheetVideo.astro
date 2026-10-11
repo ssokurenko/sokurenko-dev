@@ -1,0 +1,280 @@
+---
+// Companion-video card, per specs/06-cheatsheet-page-template.md#video-walkthrough.
+//
+// A click-to-play facade: the page ships a link, a thumbnail served from
+// this origin, and ~25 lines of script. Nothing is requested from YouTube
+// until the visitor presses play — spec 09 allows no third-party request
+// on load, and the YouTube player alone is ~1 MB of script and a cookie
+// jar. Without JS the card is still a plain link to the video.
+import { getImage } from 'astro:assets';
+import {
+  VIDEO_LABEL,
+  formatVideoDuration,
+  videoMinutes,
+  type CheatsheetVideo,
+} from '../config/cheatsheet-schema';
+
+interface Props {
+  video: CheatsheetVideo;
+}
+const { video } = Astro.props;
+const { youtube: id, title } = video;
+
+const watchUrl = `https://www.youtube.com/watch?v=${id}`;
+const minutes = videoMinutes(video.duration);
+// aria-label replaces the card's text wholesale, so it carries everything
+// the eyebrow says: what pressing does, what plays, and for how long.
+const ariaLabel = `Play video: ${title} (${minutes} ${minutes === 1 ? 'minute' : 'minutes'})`;
+
+// Fetched and re-encoded at build time (image.domains in astro.config.mjs),
+// so the browser only ever asks this origin for it. `maxresdefault` is the
+// uploader's own thumbnail but exists only for HD uploads; `mqdefault`
+// always exists and is already 16:9. `inferSize` is here as an existence
+// probe — it fetches the image now and throws if it is missing, where
+// width/height alone would defer the fetch to the asset pass and fail the
+// whole build. Both dimensions are given because inferSize would otherwise
+// fill the missing one from the source and distort the crop.
+let thumbnail: Awaited<ReturnType<typeof getImage>> | undefined;
+for (const name of ['maxresdefault', 'mqdefault']) {
+  try {
+    thumbnail = await getImage({
+      src: `https://i.ytimg.com/vi/${id}/${name}.jpg`,
+      inferSize: true,
+      width: 160,
+      height: 90,
+      densities: [1, 2],
+      format: 'webp',
+    });
+    break;
+  } catch {
+    // Try the next candidate.
+  }
+}
+// A thumbnail outage must not fail a deploy (spec 07) — the card still
+// works, it just shows the play glyph on a plain tile.
+if (!thumbnail) {
+  console.warn(`[SheetVideo] No thumbnail for YouTube video ${id}; rendering the card without one.`);
+}
+---
+
+<sheet-video class="sheet-video" data-id={id} data-title={title} data-pagefind-ignore>
+	<a class="sheet-video-card" href={watchUrl} aria-label={ariaLabel}>
+		<span class="sheet-video-thumb" aria-hidden="true">
+			{
+				thumbnail && (
+					<img
+						src={thumbnail.src}
+						srcset={thumbnail.srcSet.attribute}
+						width="160"
+						height="90"
+						alt=""
+						decoding="async"
+						fetchpriority="low"
+					/>
+				)
+			}
+			{/* Fixed black and white rather than theme tokens: the glyph sits on
+			    a photo, which looks the same in both themes. The ring keeps it
+			    readable on a light thumbnail and in grayscale. */}
+			<svg class="sheet-video-play" viewBox="0 0 48 48" width="40" height="40" focusable="false">
+				<circle cx="24" cy="24" r="22" fill="rgb(0 0 0 / 0.72)" stroke="#fff" stroke-width="2" />
+				<path d="M19.5 15.5v17l14-8.5z" fill="#fff" />
+			</svg>
+		</span>
+		<span class="sheet-video-text">
+			<span class="sheet-video-eyebrow">
+				{VIDEO_LABEL} · {formatVideoDuration(video.duration)}<span class="sheet-video-provider"
+					>{' · YouTube'}</span
+				>
+			</span>
+			<span class="sheet-video-title">{title}</span>
+		</span>
+	</a>
+</sheet-video>
+
+<script>
+	// Swaps the card for the real player on an ordinary click. Modified and
+	// middle clicks keep the link's own meaning — open the video on YouTube.
+	class SheetVideo extends HTMLElement {
+		connectedCallback() {
+			this.querySelector('a')?.addEventListener('click', (event) => {
+				if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+				event.preventDefault();
+				this.play();
+			});
+		}
+
+		play() {
+			const { id, title } = this.dataset;
+			if (!id) return;
+			const iframe = document.createElement('iframe');
+			// youtube-nocookie: privacy-enhanced mode sets no cookies until the
+			// video actually plays. Views still count on play.
+			iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&playsinline=1&rel=0`;
+			iframe.title = title ?? 'YouTube video';
+			iframe.allow =
+				'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+			iframe.allowFullscreen = true;
+			// Never `no-referrer`: YouTube refuses to play for an embed that
+			// doesn't say which site it is on ("Error 153").
+			iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+
+			const player = document.createElement('div');
+			player.className = 'sheet-video-player';
+			player.append(iframe);
+			this.replaceChildren(player);
+			iframe.focus();
+
+			(window as Window & { gtag?: (...args: unknown[]) => void }).gtag?.('event', 'video_play', {
+				video_id: id,
+			});
+		}
+	}
+
+	if (!customElements.get('sheet-video')) customElements.define('sheet-video', SheetVideo);
+</script>
+
+<style>
+	.sheet-video {
+		display: block;
+		margin-block: 1rem 1.75rem;
+		container-type: inline-size;
+	}
+
+	/* Directly under the PDF bar the two read as one block of companion
+	   material, so the gap between them tightens. Scoped to the sibling
+	   case: on a sheet with `pdf: false` the card keeps its own margin. */
+	:global(.pdf-bar) + .sheet-video {
+		margin-block-start: -1rem;
+	}
+
+	/* Same panel as the PDF bar — faint accent wash on gray-7 — so it reads
+	   as part of the site's furniture, and stays secondary to the content
+	   below it (spec 06). */
+	.sheet-video-card {
+		display: grid;
+		/* Fluid instead of a breakpoint: the thumbnail shrinks with a
+		   narrowed content column too, not just a narrow viewport. */
+		grid-template-columns: clamp(6.5rem, 30%, 10rem) 1fr;
+		align-items: center;
+		gap: 0.9rem;
+		padding: 0.6rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 12px;
+		background: var(--sl-color-gray-7);
+		background: color-mix(in srgb, var(--sl-color-accent) 4%, var(--sl-color-gray-7));
+		color: var(--sl-color-white);
+		text-decoration: none;
+		transition:
+			background-color 120ms ease,
+			border-color 120ms ease;
+	}
+
+	.sheet-video-card:hover,
+	.sheet-video-card:focus-visible {
+		border-color: var(--sl-color-accent);
+		background: var(--sl-color-accent-low);
+	}
+
+	.sheet-video-thumb {
+		position: relative;
+		display: grid;
+		place-items: center;
+		aspect-ratio: 16 / 9;
+		border-radius: 8px;
+		overflow: hidden;
+		background: var(--sl-color-gray-6);
+	}
+
+	.sheet-video-thumb img {
+		position: absolute;
+		inset: 0;
+		inline-size: 100%;
+		block-size: 100%;
+		object-fit: cover;
+	}
+
+	.sheet-video-play {
+		position: relative;
+		inline-size: 2.5rem;
+		block-size: 2.5rem;
+	}
+
+	/* The literal fills would survive forced colors and could vanish
+	   against the forced canvas; system colors keep the glyph visible. */
+	@media (forced-colors: active) {
+		.sheet-video-play circle {
+			fill: Canvas;
+			stroke: CanvasText;
+		}
+		.sheet-video-play path {
+			fill: CanvasText;
+		}
+	}
+
+	.sheet-video-text {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+		min-inline-size: 0;
+	}
+
+	.sheet-video-eyebrow {
+		font-size: 0.75rem;
+		/* gray-2, not gray-3: gray-3 drops under 4.5:1 against the
+		   accent-low hover fill in dark mode (same as the PDF buttons). */
+		color: var(--sl-color-gray-2);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.sheet-video-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.3;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		overflow: hidden;
+	}
+
+	/* Phone-width column: the text beside the thumbnail is ~10rem, where
+	   the provider wraps onto a line of its own and two lines cut most
+	   titles short. Drop the provider (the player says YouTube anyway) and
+	   give the title a third line. */
+	@container (max-width: 28rem) {
+		.sheet-video-card {
+			grid-template-columns: 6rem 1fr;
+			gap: 0.7rem;
+		}
+		.sheet-video-provider {
+			display: none;
+		}
+		.sheet-video-title {
+			-webkit-line-clamp: 3;
+			line-clamp: 3;
+		}
+	}
+
+	/* Created by the script after a click, so it carries no scoping
+	   attribute — hence :global. */
+	.sheet-video :global(.sheet-video-player) {
+		aspect-ratio: 16 / 9;
+		border-radius: 12px;
+		overflow: hidden;
+		background: #000;
+	}
+
+	.sheet-video :global(.sheet-video-player iframe) {
+		display: block;
+		inline-size: 100%;
+		block-size: 100%;
+		border: 0;
+	}
+
+	@media print {
+		.sheet-video {
+			display: none;
+		}
+	}
+</style>

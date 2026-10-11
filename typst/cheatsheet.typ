@@ -36,7 +36,7 @@
 // immediately followed by Contents on the same page. Title uses the same
 // heading font as the rest of the document (no display font) — this is a
 // reference, not a poster.
-#let frontmatter(format, title, summary, topic-version, last-verified, url) = {
+#let frontmatter(format, title, summary, topic-version, last-verified, url, video-line) = {
   // Local, tight paragraph metrics — this column is ~2.5in of narrow
   // wrapped text next to the QR, not full-width body prose. Without this
   // override it inherits the document's body `leading` (1.35em, tuned for
@@ -63,6 +63,15 @@
       #text(size: format.cover-meta-size, fill: colors.ink-mid)[#meta-line]
       #v(0.35em, weak: true)
       #text(size: format.cover-meta-size, fill: colors.ink-mid)[#summary]
+      // Present only when the sheet has a companion video. The QR beside
+      // this column opens the web page that plays it, so the line points
+      // at the code rather than printing a URL nobody can tap on e-ink.
+      // Italic sets it apart from the summary above without relying on a
+      // gray step the panel may not resolve.
+      #if video-line != "" [
+        #v(0.5em, weak: true)
+        #text(size: format.cover-meta-size, fill: colors.ink-mid, style: "italic")[#video-line]
+      ]
     ],
   )
 }
@@ -90,6 +99,7 @@
   last-verified: "",
   stale: false,
   stale-age: "",
+  video-line: "",
   body-path: none,
 ) = {
   set document(title: title, author: "sokurenko.dev", keywords: ("cheat sheet", title), date: none)
@@ -154,7 +164,7 @@
   show link: it => underline(text(fill: colors.ink, it))
 
   // --- Front matter + Contents, one page, no separate title page ---
-  frontmatter(format, title, summary, topic-version, last-verified, url)
+  frontmatter(format, title, summary, topic-version, last-verified, url, video-line)
   v(1em)
   line(length: 100%, stroke: 0.5pt + colors.hairline)
   v(0.8em)

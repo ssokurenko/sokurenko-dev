@@ -1,17 +1,20 @@
 ---
-// Adds the topicVersion badge, staleness warning, and PDF download bar
-// below the title, per specs/06-cheatsheet-page-template.md.
+// Adds the topicVersion badge, staleness warning, PDF download bar, and
+// companion-video card below the title, per
+// specs/06-cheatsheet-page-template.md.
 //
 // Not rendered on the home page at all — index.mdx has `hero:` frontmatter,
 // which routes Starlight's Page.astro into a branch that never calls
 // PageTitle in the first place (see src/components/Hero.astro).
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 import PdfDownloadBar from './PdfDownloadBar.astro';
+import SheetVideo from './SheetVideo.astro';
 import {
   isStale,
   hasTopicVersion,
   formatTopicVersion,
   formatVerificationAge,
+  type CheatsheetVideo,
 } from '../config/cheatsheet-schema';
 
 const data = Astro.locals.starlightRoute.entry.data as any;
@@ -21,6 +24,7 @@ const cs = data.cheatsheet as
       topicVersion: string;
       lastVerified: Date;
       pdf?: boolean;
+      video?: CheatsheetVideo;
     }
   | undefined;
 
@@ -61,6 +65,7 @@ const version = cs && hasTopicVersion(cs.topicVersion) ? formatTopicVersion(cs.t
 				</aside>
 			)}
 			{cs.pdf !== false && <PdfDownloadBar slug={cs.slug} />}
+			{cs.video && <SheetVideo video={cs.video} />}
 		</>
 	)
 }

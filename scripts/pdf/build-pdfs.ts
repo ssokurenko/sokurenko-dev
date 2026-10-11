@@ -23,6 +23,8 @@ import {
   hasTopicVersion,
   isStale,
   formatVerificationAge,
+  formatVideoDuration,
+  VIDEO_LABEL,
 } from '../../src/config/cheatsheet-schema.ts';
 
 const args = process.argv.slice(2);
@@ -125,9 +127,14 @@ async function main() {
     const staleAge = stale
       ? formatVerificationAge(Math.round((Date.now() - cs.lastVerified.getTime()) / 86_400_000))
       : '';
+    // A PDF can't play the video, but the cover QR already opens the page
+    // that hosts it — so the front matter says so in one line rather than
+    // adding a second code that readers would have to tell apart.
+    const videoLine = cs.video
+      ? `${VIDEO_LABEL} (${formatVideoDuration(cs.video.duration)}) — scan the code to watch.`
+      : '';
 
     for (const format of FORMATS) {
-      const cacheKey = `${cs.slug}:${format}`;
       // `staleAge` is in the key because it is the one rendered value that
       // changes with the calendar rather than with the source: without it a
       // sheet that crossed the 180-day line — or aged from "7 months" to
@@ -137,6 +144,9 @@ async function main() {
           preparedBody,
           JSON.stringify(cs),
           staleAge,
+          // Worded in TS, not the template, so a wording change would
+          // otherwise leave every cached PDF on the old sentence.
+          videoLine,
           templateFingerprint,
           formatConfigSource(format),
           'typst:0.15.x',
@@ -146,6 +156,11 @@ async function main() {
       const outFile = path.join(OUT_DIR, `${cs.slug}-kindle-${format}.pdf`);
       const cacheFile = path.join(CACHE_DIR, `${cs.slug}-kindle-${format}.pdf`);
       const targetFile = DEV ? outFile : cacheFile;
+      // Keyed by the file the hash describes, not by slug + format: a
+      // `--dev` build writes to public/pdf/ but used to record its hash
+      // under the same key as .pdf-cache/, so the next full build saw a
+      // matching hash, found the old .pdf-cache/ file, and shipped it.
+      const cacheKey = path.relative(REPO_ROOT, targetFile);
 
       if (!FORCE && hashes[cacheKey] === contentHash && existsSync(targetFile)) {
         skipped++;
@@ -181,6 +196,7 @@ async function main() {
         `  last-verified: ${JSON.stringify(lastVerified)},`,
         `  stale: ${stale},`,
         `  stale-age: ${JSON.stringify(staleAge)},`,
+        `  video-line: ${JSON.stringify(videoLine)},`,
         `  body-path: ${JSON.stringify(rootRelativeBodyPath)},`,
         ')',
       ].join('\n');
