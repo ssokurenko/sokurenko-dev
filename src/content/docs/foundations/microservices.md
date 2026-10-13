@@ -24,6 +24,10 @@ cheatsheet:
     - foundations/api-concepts
     - foundations/queuing-systems
     - backend/rest
+  video:
+    youtube: IYCp1k9tTt8
+    title: "Microservices Explained: Boundaries, Sagas, Failure & When NOT to Split"
+    duration: "5:02"
 ---
 
 ## Mental model
