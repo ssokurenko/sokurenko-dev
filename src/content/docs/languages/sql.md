@@ -19,6 +19,10 @@ cheatsheet:
   difficulty: intermediate
   tags: [sql, queries, joins, transactions]
   pdf: true
+  video:
+    youtube: s5LVORAKxzY
+    title: "SQL in 4 Minutes: Joins, GROUP BY, Window Functions & Transactions"
+    duration: "3:57"
 ---
 
 ## Mental model
