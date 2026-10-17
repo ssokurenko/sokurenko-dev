@@ -26,6 +26,10 @@ cheatsheet:
     - foundations/api-concepts
     - backend/rest
     - languages/sql
+  video:
+    youtube: ht4rm9yNP48
+    title: "OWASP Top 10 Explained: Every Category + the One Fix Each Needs"
+    duration: "5:08"
 ---
 
 ## Mental model
