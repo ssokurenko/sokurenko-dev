@@ -12,6 +12,10 @@ cheatsheet:
   lastVerified: 2026-08-01
   difficulty: beginner
   tags: [rest, api, http, openapi, swagger]
+  video:
+    youtube: BzpcPezUFQw
+    title: "REST API Design: Everything You Need to Build APIs Clients Can Trust"
+    duration: "3:00"
 ---
 
 ## Mental model
