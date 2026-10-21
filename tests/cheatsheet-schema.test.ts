@@ -4,6 +4,7 @@ import {
   parseYouTubeId,
   formatVideoDuration,
   videoMinutes,
+  formatVerificationAge,
 } from '../src/config/cheatsheet-schema.ts';
 
 const ID = 'tcUBahvsf7Y';
@@ -52,6 +53,24 @@ describe('formatVideoDuration', () => {
   ])('%s → %s', (duration, minutes, label) => {
     expect(videoMinutes(duration)).toBe(minutes);
     expect(formatVideoDuration(duration)).toBe(label);
+  });
+});
+
+describe('formatVerificationAge', () => {
+  it.each([
+    [0, '0 days'],
+    [1, '1 days'],
+    [30, '30 days'],
+    [59, '59 days'],
+    [60, '2 months'],
+    [61, '2 months'],
+    [365, '12 months'],
+    [700, '23 months'],
+    [730, '2 years'],
+    [731, '2 years'],
+    [1095, '3 years'],
+  ])('%s days → %s', (days, expected) => {
+    expect(formatVerificationAge(days)).toBe(expected);
   });
 });
 
