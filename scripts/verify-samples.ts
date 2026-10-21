@@ -76,7 +76,6 @@ async function main() {
   }
 
   if (samples.length === 0) {
-    console.log('No `ts`/`tsx` code samples found.');
     return;
   }
 
