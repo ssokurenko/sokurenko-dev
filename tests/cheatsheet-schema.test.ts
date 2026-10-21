@@ -4,9 +4,40 @@ import {
   parseYouTubeId,
   formatVideoDuration,
   videoMinutes,
+  hasTopicVersion,
 } from '../src/config/cheatsheet-schema.ts';
 
 const ID = 'tcUBahvsf7Y';
+
+describe('hasTopicVersion', () => {
+  it.each([
+    '1.0',
+    'v5.9',
+    '.NET 9',
+    'ES2026',
+    'GraphQL Spec',
+  ])('returns true for valid version %s', (version) => {
+    expect(hasTopicVersion(version)).toBe(true);
+  });
+
+  it.each([
+    undefined,
+    '',
+    'n/a',
+    'na',
+    'none',
+    'not applicable',
+    '-',
+    '—',
+    'tbd',
+    '  N/A  ',
+    ' NA ',
+    ' NONE ',
+    ' TBD ',
+  ])('returns false for ignored value %j', (version) => {
+    expect(hasTopicVersion(version)).toBe(false);
+  });
+});
 
 describe('parseYouTubeId', () => {
   it.each([
