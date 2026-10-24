@@ -74,8 +74,10 @@ curl -sI https://dxxxx.cloudfront.net/app.js \
 A cache policy sets which headers, cookies, and query strings join the cache key, plus the minimum, default, and maximum TTL. If the origin sends `Cache-Control: max-age`, CloudFront uses it, clamped between your min and max. With no header, the default TTL applies. Include only what changes the response: every extra key part lowers the hit ratio.
 
 ```text
-CachingOptimized   658327ea-f89d-4fab-a63d-7e88639e58f6
-CachingDisabled    4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+CachingOptimized
+  658327ea-f89d-4fab-a63d-7e88639e58f6
+CachingDisabled
+  4135ea2d-6df8-44a3-9df3-4b5a84be39ad
 ```
 
 > **Gotcha:** `CachingOptimized` has a 1 s minimum TTL, so CloudFront caches responses even when the origin sends `no-store`, `no-cache`, or `private`. For dynamic paths use `CachingDisabled`.
@@ -114,7 +116,7 @@ Keep the bucket private and let only your distribution read it. Add `s3:ListBuck
   "Resource": "arn:aws:s3:::my-bucket/*",
   "Condition": {"StringEquals": {
     "AWS:SourceArn":
-      "arn:aws:cloudfront::111122223333:distribution/E123"
+      "arn:aws:cloudfront::ACCT:distribution/E123"
   }}
 }
 ```
