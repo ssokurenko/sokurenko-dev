@@ -5,10 +5,42 @@ import {
   formatVideoDuration,
   videoMinutes,
   isStale,
+  hasTopicVersion,
+  formatVerificationAge,
 } from '../src/config/cheatsheet-schema.ts';
 import { STALENESS_WARNING_DAYS } from '../src/config/limits.ts';
 
 const ID = 'tcUBahvsf7Y';
+
+describe('hasTopicVersion', () => {
+  it.each([
+    '1.0',
+    'v5.9',
+    '.NET 9',
+    'ES2026',
+    'GraphQL Spec',
+  ])('returns true for valid version %s', (version) => {
+    expect(hasTopicVersion(version)).toBe(true);
+  });
+
+  it.each([
+    undefined,
+    '',
+    'n/a',
+    'na',
+    'none',
+    'not applicable',
+    '-',
+    '—',
+    'tbd',
+    '  N/A  ',
+    ' NA ',
+    ' NONE ',
+    ' TBD ',
+  ])('returns false for ignored value %j', (version) => {
+    expect(hasTopicVersion(version)).toBe(false);
+  });
+});
 
 describe('parseYouTubeId', () => {
   it.each([
@@ -88,6 +120,24 @@ describe('formatVideoDuration', () => {
   ])('%s → %s', (duration, minutes, label) => {
     expect(videoMinutes(duration)).toBe(minutes);
     expect(formatVideoDuration(duration)).toBe(label);
+  });
+});
+
+describe('formatVerificationAge', () => {
+  it.each([
+    [0, '0 days'],
+    [1, '1 days'],
+    [30, '30 days'],
+    [59, '59 days'],
+    [60, '2 months'],
+    [61, '2 months'],
+    [365, '12 months'],
+    [700, '23 months'],
+    [730, '2 years'],
+    [731, '2 years'],
+    [1095, '3 years'],
+  ])('%s days → %s', (days, expected) => {
+    expect(formatVerificationAge(days)).toBe(expected);
   });
 });
 
