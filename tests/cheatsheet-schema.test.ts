@@ -1,12 +1,46 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
   cheatsheetSchema,
   parseYouTubeId,
   formatVideoDuration,
   videoMinutes,
+  isStale,
+  hasTopicVersion,
+  formatVerificationAge,
 } from '../src/config/cheatsheet-schema.ts';
+import { STALENESS_WARNING_DAYS } from '../src/config/limits.ts';
 
 const ID = 'tcUBahvsf7Y';
+
+describe('hasTopicVersion', () => {
+  it.each([
+    '1.0',
+    'v5.9',
+    '.NET 9',
+    'ES2026',
+    'GraphQL Spec',
+  ])('returns true for valid version %s', (version) => {
+    expect(hasTopicVersion(version)).toBe(true);
+  });
+
+  it.each([
+    undefined,
+    '',
+    'n/a',
+    'na',
+    'none',
+    'not applicable',
+    '-',
+    '—',
+    'tbd',
+    '  N/A  ',
+    ' NA ',
+    ' NONE ',
+    ' TBD ',
+  ])('returns false for ignored value %j', (version) => {
+    expect(hasTopicVersion(version)).toBe(false);
+  });
+});
 
 describe('parseYouTubeId', () => {
   it.each([
@@ -42,6 +76,40 @@ describe('parseYouTubeId', () => {
   });
 });
 
+describe('isStale', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns false for a recent date', () => {
+    // 10 days ago
+    const lastVerified = new Date('2023-12-22T12:00:00Z');
+    expect(isStale(lastVerified)).toBe(false);
+  });
+
+  it('returns false for exactly the staleness limit', () => {
+    const lastVerified = new Date('2024-01-01T12:00:00Z');
+    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS);
+    expect(isStale(lastVerified)).toBe(false);
+  });
+
+  it('returns true for a date older than the staleness limit', () => {
+    const lastVerified = new Date('2024-01-01T12:00:00Z');
+    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS - 1);
+    expect(isStale(lastVerified)).toBe(true);
+  });
+
+  it('returns false for a future date', () => {
+    const lastVerified = new Date('2024-01-02T12:00:00Z');
+    expect(isStale(lastVerified)).toBe(false);
+  });
+});
+
 describe('formatVideoDuration', () => {
   it.each([
     ['0:20', 1, '1 min'],
@@ -52,6 +120,24 @@ describe('formatVideoDuration', () => {
   ])('%s → %s', (duration, minutes, label) => {
     expect(videoMinutes(duration)).toBe(minutes);
     expect(formatVideoDuration(duration)).toBe(label);
+  });
+});
+
+describe('formatVerificationAge', () => {
+  it.each([
+    [0, '0 days'],
+    [1, '1 days'],
+    [30, '30 days'],
+    [59, '59 days'],
+    [60, '2 months'],
+    [61, '2 months'],
+    [365, '12 months'],
+    [700, '23 months'],
+    [730, '2 years'],
+    [731, '2 years'],
+    [1095, '3 years'],
+  ])('%s days → %s', (days, expected) => {
+    expect(formatVerificationAge(days)).toBe(expected);
   });
 });
 
