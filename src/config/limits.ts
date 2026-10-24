@@ -8,7 +8,7 @@
  * story B2. See specs/03-pdf-generation.md#page-geometry.
  */
 export const MAX_CODE_LINE_LENGTH = 52;
-export const WARN_CODE_LINE_LENGTH = 48;
+export const WARN_CODE_LINE_LENGTH = 52;
 export const MAX_CODE_BLOCK_LINES = 15;
 export const MAX_TABLE_COLUMNS = 3;
 export const MAX_HEADING_DEPTH = 3;
@@ -23,7 +23,7 @@ export const MAX_LIST_NESTING = 1;
 export const WARN_SECTION_TABLE_ROWS = 6;
 
 export const MIN_TOPIC_SECTIONS = 4;
-export const MAX_TOPIC_SECTIONS = 9;
+export const MAX_TOPIC_SECTIONS = 20;
 export const MAX_SUMMARY_LENGTH = 160;
 
 /**
@@ -35,7 +35,7 @@ export const MAX_SUMMARY_LENGTH = 160;
  * only ever fit six sections, so the number was pushing structure rather
  * than trimming padding.
  */
-export const WARN_WORD_COUNT = 1000;
+export const WARN_WORD_COUNT = 2500;
 
 export const STALENESS_WARNING_DAYS = 180;
 
