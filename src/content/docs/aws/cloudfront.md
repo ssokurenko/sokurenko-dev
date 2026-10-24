@@ -116,7 +116,7 @@ Keep the bucket private and let only your distribution read it. Add `s3:ListBuck
   "Resource": "arn:aws:s3:::my-bucket/*",
   "Condition": {"StringEquals": {
     "AWS:SourceArn":
-      "arn:aws:cloudfront::ACCOUNT:distribution/E123"
+      "arn:aws:cloudfront::ACCT:distribution/E123"
   }}
 }
 ```
