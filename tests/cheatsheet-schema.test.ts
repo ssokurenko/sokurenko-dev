@@ -1,12 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
   cheatsheetSchema,
   parseYouTubeId,
   formatVideoDuration,
   videoMinutes,
+  isStale,
   hasTopicVersion,
   formatVerificationAge,
 } from '../src/config/cheatsheet-schema.ts';
+import { STALENESS_WARNING_DAYS } from '../src/config/limits.ts';
 
 const ID = 'tcUBahvsf7Y';
 
@@ -71,6 +73,40 @@ describe('parseYouTubeId', () => {
     'not a url',
   ])('rejects %s', (input) => {
     expect(parseYouTubeId(input)).toBeNull();
+  });
+});
+
+describe('isStale', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-01T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns false for a recent date', () => {
+    // 10 days ago
+    const lastVerified = new Date('2023-12-22T12:00:00Z');
+    expect(isStale(lastVerified)).toBe(false);
+  });
+
+  it('returns false for exactly the staleness limit', () => {
+    const lastVerified = new Date('2024-01-01T12:00:00Z');
+    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS);
+    expect(isStale(lastVerified)).toBe(false);
+  });
+
+  it('returns true for a date older than the staleness limit', () => {
+    const lastVerified = new Date('2024-01-01T12:00:00Z');
+    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS - 1);
+    expect(isStale(lastVerified)).toBe(true);
+  });
+
+  it('returns false for a future date', () => {
+    const lastVerified = new Date('2024-01-02T12:00:00Z');
+    expect(isStale(lastVerified)).toBe(false);
   });
 });
 
