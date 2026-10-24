@@ -94,13 +94,13 @@ describe('isStale', () => {
 
   it('returns false for exactly the staleness limit', () => {
     const lastVerified = new Date('2024-01-01T12:00:00Z');
-    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS);
+    lastVerified.setUTCDate(lastVerified.getUTCDate() - STALENESS_WARNING_DAYS);
     expect(isStale(lastVerified)).toBe(false);
   });
 
   it('returns true for a date older than the staleness limit', () => {
     const lastVerified = new Date('2024-01-01T12:00:00Z');
-    lastVerified.setDate(lastVerified.getDate() - STALENESS_WARNING_DAYS - 1);
+    lastVerified.setUTCDate(lastVerified.getUTCDate() - STALENESS_WARNING_DAYS - 1);
     expect(isStale(lastVerified)).toBe(true);
   });
 

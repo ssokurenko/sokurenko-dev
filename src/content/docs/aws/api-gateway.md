@@ -19,7 +19,7 @@ cheatsheet:
   difficulty: intermediate
   tags: [aws, api-gateway, serverless, api, http, websocket]
   related:
-    - aws/lambda
+    - aws/aws-lambda
     - infrastructure/aws-serverless
     - backend/rest
 ---
