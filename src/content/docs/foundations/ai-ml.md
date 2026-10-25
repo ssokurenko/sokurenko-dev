@@ -166,7 +166,8 @@ const decoder = new TextDecoder();
 while (true) {
   const { done, value } = await reader.read();
   if (done) break;
-  const text = decoder.decode(value, { stream: true });
+  const opts = { stream: true };
+  const text = decoder.decode(value, opts);
   console.log(text); // raw SSE text
 }
 ```
