@@ -14,6 +14,10 @@ cheatsheet:
   lastVerified: 2026-08-06
   difficulty: beginner
   tags: [agile, scrum, process, teamwork, sprint]
+  video:
+    youtube: vezgpwU3lss
+    title: "Scrum Explained: Run Sprints That Actually Change Decisions"
+    duration: "4:22"
 ---
 
 ## Mental model

@@ -28,6 +28,10 @@ cheatsheet:
   tags: [postgresql, database, indexes, performance, transactions]
   related:
     - languages/sql
+  video:
+    youtube: qH1f2PkNQHk
+    title: "PostgreSQL Explained: 3 Facts Behind Every Surprise (Indexes, Vacuum, Locks)"
+    duration: "2:24"
 ---
 
 ## Mental model

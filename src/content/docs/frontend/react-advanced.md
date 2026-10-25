@@ -28,6 +28,10 @@ cheatsheet:
     - frontend/react
     - frontend/nextjs-advanced
     - languages/typescript
+  video:
+    youtube: bigOOl_K01c
+    title: "React 19 Advanced: Server Components, 'use client', use() and Streaming SSR in 3 Minutes"
+    duration: "3:24"
 ---
 
 ## Mental model

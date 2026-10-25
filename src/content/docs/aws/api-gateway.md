@@ -22,6 +22,10 @@ cheatsheet:
     - aws/aws-lambda
     - infrastructure/aws-serverless
     - backend/rest
+  video:
+    youtube: HR8oxb5f27E
+    title: "AWS API Gateway Explained: HTTP vs REST vs WebSocket, Auth, Throttling & Deploys"
+    duration: "5:42"
 ---
 
 ## Mental model

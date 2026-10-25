@@ -27,6 +27,10 @@ cheatsheet:
     - frontend/nextjs
     - languages/typescript
   pdf: true
+  video:
+    youtube: CfDDAPeKeFI
+    title: "React Explained: Components, State, Effects & Every Core Hook in 5 Minutes"
+    duration: "5:23"
 ---
 
 ## Mental model
