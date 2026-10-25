@@ -10,7 +10,15 @@ describe('verify-samples', () => {
     'every ts code sample in the catalog compiles under tsc --strict',
     () => {
       const script = path.join(REPO_ROOT, 'scripts/verify-samples.ts');
-      expect(() => execFileSync(TSX, [script], { encoding: 'utf8' })).not.toThrow();
+      // The script prints tsc diagnostics to stdout; surface them in the
+      // failure message instead of vitest's bare "Command failed".
+      let failure = '';
+      try {
+        execFileSync(TSX, [script], { encoding: 'utf8', stdio: 'pipe' });
+      } catch (err: any) {
+        failure = `${err.stdout ?? ''}${err.stderr ?? ''}` || String(err);
+      }
+      expect(failure, failure).toBe('');
     },
     // Shells out to tsc across every sample; ran close to the 5s default
     // locally, so give a cold CI runner real headroom (see pdf-pipeline.test.ts).
