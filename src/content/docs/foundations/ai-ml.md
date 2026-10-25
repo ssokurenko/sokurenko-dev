@@ -161,13 +161,13 @@ const res = await fetch("/api/chat", {
   method: "POST",
   body: JSON.stringify({ prompt: "Hi" }),
 });
-const reader = res.body!
-  .pipeThrough(new TextDecoderStream())
-  .getReader();
+const reader = res.body!.getReader();
+const decoder = new TextDecoder();
 while (true) {
   const { done, value } = await reader.read();
   if (done) break;
-  console.log(value); // raw SSE text
+  const text = decoder.decode(value, { stream: true });
+  console.log(text); // raw SSE text
 }
 ```
 
