@@ -21,7 +21,8 @@
  * `export {}`) so unrelated snippets can reuse identifiers like `const a`
  * without colliding.
  */
-import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { builtinModules } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import fg from 'fast-glob';
@@ -35,13 +36,29 @@ const REPO_ROOT = new URL('../', import.meta.url).pathname;
 const CONTENT_ROOT = path.join(REPO_ROOT, 'src/content/docs');
 const OUT_DIR = path.join(REPO_ROOT, '.ts-sample-cache');
 
-const processor = unified().use(remarkParse).use(remarkGfm);
+const BUILTINS = new Set(builtinModules);
+
+const processor =unified().use(remarkParse).use(remarkGfm);
 
 interface Sample {
   sourceFile: string;
   sourceLine: number;
   tempFile: string;
   isTsx: boolean;
+}
+
+/** First bare import specifier whose package isn't in node_modules. */
+function missingPackage(code: string): string | undefined {
+  const re = /^\s*import\s[^'"]*?['"]([^'"]+)['"]/gm;
+  for (const m of code.matchAll(re)) {
+    const spec = m[1];
+    if (spec.startsWith('.') || spec.startsWith('node:')) continue;
+    const parts = spec.split('/');
+    const pkg = spec.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+    if (BUILTINS.has(pkg)) continue;
+    if (!existsSync(path.join(REPO_ROOT, 'node_modules', pkg))) return pkg;
+  }
+  return undefined;
 }
 
 async function main() {
@@ -62,6 +79,14 @@ async function main() {
       const isTsx = node.lang === 'tsx';
       const isTs = node.lang === 'ts' || node.lang === 'typescript';
       if (!isTs && !isTsx) return;
+      const missing = missingPackage(node.value);
+      if (missing) {
+        // Third-party library samples (zustand, jotai, TanStack Query…)
+        // can't type-check without the package; the site must not ship
+        // them and they aren't devDependencies, so skip with a notice.
+        console.log(`skipped sample: "${missing}" is not installed`);
+        return;
+      }
       index++;
       const ext = isTsx ? 'tsx' : 'ts';
       const tempFile = path.join(OUT_DIR, `sample-${index}.${ext}`);
