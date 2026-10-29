@@ -197,6 +197,8 @@ Non-negotiable. A wrong cheat sheet is worse than no cheat sheet, because it is 
 4. **Confirm version-gated claims** against release notes.
 5. **Set `lastVerified`** only after 1–4 are complete.
 
+**Cloud-service sheets** (`aws`, `cloudflare` sections) are the one exception to step 1: their behavior only exists on the provider's platform, so don't build verification scripts or install provider SDKs for them. Tag samples `js`/`bash`/`json` (not `ts`, which `verify:samples` type-checks), syntax-check them locally, and verify every claim — especially limits and quotas — against the provider's official documentation instead. See CLAUDE.md.
+
 ## Before you finish
 
 ```bash
