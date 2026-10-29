@@ -1,5 +1,5 @@
 /**
- * The ten top-level sections of the catalog. This is the single source
+ * The eleven top-level sections of the catalog. This is the single source
  * of truth for the taxonomy — see specs/01-information-architecture.md.
  * The Zod schema, sidebar config, front page, and PDF templates all derive
  * from this array. Do not hardcode a section slug or label anywhere else.
@@ -44,6 +44,11 @@ export const SECTIONS = [
     slug: 'aws',
     label: 'AWS',
     blurb: 'Amazon Web Services, one service at a time.',
+  },
+  {
+    slug: 'cloudflare',
+    label: 'Cloudflare',
+    blurb: 'Cloudflare developer platform, one product at a time.',
   },
   {
     slug: 'tooling',

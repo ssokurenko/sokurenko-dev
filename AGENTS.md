@@ -32,6 +32,15 @@ Delivery backlog: [specs/stories/](specs/stories/).
 
 **Use the `writing-cheatsheets` skill.** It encodes the full workflow, the format contract, and the quality bar. Do not write a sheet from memory of these rules.
 
+### Cloud-service sheets (`aws`, `cloudflare`)
+
+Sheets about a hosted cloud platform — the `aws` and `cloudflare` sections, one product per sheet (e.g. `cloudflare/cloudflare-workers.md`) — document behavior that only exists on the provider's infrastructure: limits, consistency, billing, deploy semantics.
+
+- **Do not add verification scripts or harnesses** for them (no new `scripts/verify-*`, no devDependencies on provider SDKs or emulators). Instead, **double-check every claim against the provider's official documentation** and list those pages in `verifiedAgainst`.
+- Tag their code samples `js` (or `bash`/`json`), not `ts`: `npm run verify:samples` type-checks every `ts` block, and platform types such as `Env` or `KVNamespace` are not installed. Still syntax-check JS samples (`node --check`) and parse JSON config blocks before committing.
+- Name the file `<slug>.md`, as every other section does. The PDF footer and cover QR code link to `/<section>/<slug>/`, but the web route comes from the file path, so a mismatch (as in the existing `aws/*.md` sheets) prints a URL that does not exist.
+- Limits and quotas change often; quote them from the provider's limits page on the day you set `lastVerified`, never from memory.
+
 ## Hard rules
 
 Violating any of these breaks the three-output guarantee or the site's credibility.
