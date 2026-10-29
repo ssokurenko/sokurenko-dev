@@ -38,7 +38,7 @@ Sheets about a hosted cloud platform — the `aws` and `cloudflare` sections, on
 
 - **Do not add verification scripts or harnesses** for them (no new `scripts/verify-*`, no devDependencies on provider SDKs or emulators). Instead, **double-check every claim against the provider's official documentation** and list those pages in `verifiedAgainst`.
 - Tag their code samples `js` (or `bash`/`json`), not `ts`: `npm run verify:samples` type-checks every `ts` block, and platform types such as `Env` or `KVNamespace` are not installed. Still syntax-check JS samples (`node --check`) and parse JSON config blocks before committing.
-- Name the file `<slug>.md`, as every other section does. The PDF footer and cover QR code link to `/<section>/<slug>/`, but the web route comes from the file path, so a mismatch (as in the existing `aws/*.md` sheets) prints a URL that does not exist.
+- Name the file `<slug>.md`, as every other section does. The PDF footer and cover QR code link to `/<section>/<slug>/`, but the web route comes from the file path, so a mismatch prints a URL that does not exist. `npm run lint` rejects it (`path-slug`). The AWS sheets once had this bug; their old web paths now redirect via `src/config/redirects.ts`.
 - Limits and quotas change often; quote them from the provider's limits page on the day you set `lastVerified`, never from memory.
 
 ## Hard rules
