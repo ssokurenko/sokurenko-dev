@@ -180,4 +180,29 @@ Prose.
     expect(rules).toContain('duplicate-slug');
     expect(rules).toContain('dangling-related');
   }, LINT_TEST_TIMEOUT);
+
+  it('flags a file whose path does not match section/slug', () => {
+    // The PDF footer and QR code print /languages/widgets/, but this
+    // file would be served at /languages/gadgets/.
+    const dir = path.join(root, 'pathslug', 'languages');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      path.join(dir, 'gadgets.md'),
+      `${VALID_FRONTMATTER}
+## Mental model
+
+Prose.
+
+## Topic
+
+Prose.
+
+## Further reading
+`,
+    );
+    const { exitCode, findings } = runLint(path.join(root, 'pathslug'));
+    const rules = new Set(findings.map((f) => f.rule));
+    expect(exitCode).toBe(1);
+    expect(rules).toContain('path-slug');
+  }, LINT_TEST_TIMEOUT);
 });

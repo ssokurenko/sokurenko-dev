@@ -3,11 +3,15 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import { SECTIONS } from './src/config/taxonomy.ts';
 import { ORIGIN_TRIAL_TOKENS } from './src/config/origin-trials.ts';
+import { REDIRECTS } from './src/config/redirects.ts';
 import { rehypePagefindWeights } from './scripts/rehype-pagefind-weights.ts';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://sokurenko.dev',
+	// Moved web routes — see src/config/redirects.ts. Static output emits a
+	// meta-refresh page with a canonical link at each old path.
+	redirects: REDIRECTS,
 	// `markdown.rehypePlugins` is deprecated in favor of `markdown.processor`
 	// (unified({ rehypePlugins }) from @astrojs/markdown-remark), but that
 	// API replaces Astro's whole markdown pipeline rather than composing

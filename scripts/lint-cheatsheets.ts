@@ -169,6 +169,14 @@ function lintFile(file: string, sheets: SheetInfo[]) {
       related: cheatsheet.related ?? [],
     });
 
+    // The web route comes from the file path, but the PDF footer and cover
+    // QR code print /<section>/<slug>/ — they must be the same path.
+    const routePath = path.relative(CONTENT_ROOT, file).replace(/\\/g, '/').replace(/\.md$/, '');
+    const slugPath = `${cheatsheet.section}/${cheatsheet.slug}`;
+    if (routePath !== slugPath) {
+      report(file, undefined, 'error', 'path-slug', `file is served at /${routePath}/ but its PDFs print /${slugPath}/ — move it to ${slugPath}.md`);
+    }
+
     const ageDays = (Date.now() - cheatsheet.lastVerified.getTime()) / (1000 * 60 * 60 * 24);
     if (ageDays > STALENESS_WARNING_DAYS) {
       report(file, undefined, 'warning', 'stale', `lastVerified is ${Math.round(ageDays)} days ago (> ${STALENESS_WARNING_DAYS})`);
