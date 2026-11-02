@@ -23,10 +23,12 @@ function run(script: string, args: string[] = []) {
 // Measured on an M-series laptop: ~14s warm, ~30s cold for the whole
 // suite. A loaded or CI machine runs several times slower, and the two
 // tests also compete with the tsc/lint test files vitest runs in
-// parallel — a 60s ceiling was already being hit there. Raise this if
-// the catalog doubles again; a real failure exits non-zero in seconds,
-// so a high ceiling costs nothing when something is actually broken.
-const PDF_TEST_TIMEOUT = 240_000;
+// parallel — a 60s ceiling was already being hit there. At 114 sheets
+// (456 typst invocations plus QR decoding) CI validation took longer
+// than the previous 240s ceiling. Raise this if the catalog doubles
+// again; a real failure exits non-zero in seconds, so a high ceiling
+// costs nothing when something is actually broken.
+const PDF_TEST_TIMEOUT = 900_000;
 
 describe('pdf pipeline', () => {
   it(
