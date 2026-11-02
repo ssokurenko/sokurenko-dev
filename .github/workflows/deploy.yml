@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   TYPST_VERSION: '0.15.1'
@@ -42,8 +42,8 @@ jobs:
           key: pdf-${{ env.TYPST_VERSION }}-${{ hashFiles('src/content/docs/**/*.md', 'typst/**') }}
           restore-keys: pdf-${{ env.TYPST_VERSION }}-
 
-      - run: npm run verify
       - run: npm run build
+      - run: npm run verify
 
       - uses: actions/upload-pages-artifact@v3
         with:
