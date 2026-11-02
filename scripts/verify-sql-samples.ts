@@ -37,7 +37,13 @@ const processor = unified().use(remarkParse).use(remarkGfm);
 // against the vendor documentation cited in their `verifiedAgainst`
 // frontmatter instead. Keep this list as short as it can possibly be:
 // every entry is a sheet nothing mechanically checks.
-const ENGINE_SPECIFIC = new Set(['data/postgresql.md']);
+const ENGINE_SPECIFIC = new Set([
+  'data/postgresql.md',
+  'data/pgvector.md',
+  'data/timescaledb.md',
+  // AWS IoT rules SQL: topic filters in FROM, IoT functions.
+  'aws/aws-iot-core.md',
+]);
 
 // Minimal schema covering the tables the catalog's SQL examples assume
 // exist. Extend this as new SQL-containing sheets are added.
