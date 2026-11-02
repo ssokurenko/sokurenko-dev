@@ -1,7 +1,5 @@
 # Content plan — next 60 cheat sheets
 
-**Prepared:** 2026-11-02 · **Owner:** Serhii Sokurenko · **Writer:** Claude Opus 5.5 using the `writing-cheatsheets` skill
-
 This document is the content backlog for the catalog. It ranks the next sixty sheets by relevance, and gives the writing agent a short brief per sheet so each one lands at the catalog's quality bar on the first pass.
 
 The ranking blends four signals, in this order of weight:
