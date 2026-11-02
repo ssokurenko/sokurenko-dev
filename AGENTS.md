@@ -26,7 +26,7 @@ Each cheat sheet is one Markdown file that renders to three outputs:
 | Build or CI | [specs/07-build-and-deploy.md](specs/07-build-and-deploy.md) |
 | Shipping anything | [specs/09-quality-bar.md](specs/09-quality-bar.md) |
 
-Delivery backlog: [specs/stories/](specs/stories/).
+Delivery backlog: [specs/stories/](specs/stories/). Content plan (next 60 sheets, ranked, with per-sheet writer briefs): [CONTENT-PLAN.md](CONTENT-PLAN.md).
 
 ## Writing a cheat sheet
 
