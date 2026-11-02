@@ -22,6 +22,10 @@ cheatsheet:
     - frontend/react
     - frontend/nextjs
   pdf: true
+  video:
+    youtube: n7NborauG24
+    title: "Build Fast Sites with Astro: Everything You Need (and the Traps to Avoid)"
+    duration: "3:13"
 ---
 
 ## Mental model
