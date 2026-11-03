@@ -26,6 +26,13 @@ cheatsheet:
     - data/redis
     - foundations/http
     - infrastructure/opentelemetry
+  video:
+    youtube: 9_zRoijY3Ek
+    title: "System Design Explained: Everything You Need to Size and Defend a Design with Numbers"
+    duration: "4:21"
+
+
+
 ---
 
 ## Mental model
