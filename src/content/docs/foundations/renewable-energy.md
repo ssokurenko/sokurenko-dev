@@ -28,6 +28,10 @@ cheatsheet:
     - foundations/iot-concepts
     - backend/mqtt
     - languages/sql
+  video:
+    youtube: BTTQEC-3miA
+    title: "Renewable Energy for Developers: kW vs kWh, Solar, Wind, Batteries & Dashboards That Add Up"
+    duration: "4:09"
 ---
 
 ## Mental model
