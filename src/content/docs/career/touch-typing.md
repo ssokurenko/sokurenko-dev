@@ -227,9 +227,10 @@ Typing is a motor skill: frequent short sessions build it better than
 occasional long ones. Attach practice to an existing routine — right
 after opening your laptop or with your morning coffee — so it needs no
 willpower. On busy days five minutes still keeps the streak.
-[TypeFit](https://type.fit/) is built around this loop: ten-minute
-workouts in the browser, a weak-key drill one click away, and a
-per-key confidence heat map on the Progress page.
+[TypeFit](https://type.fit/) is built around this loop and is free,
+with no ads: ten-minute workouts in the browser, a weak-key drill one
+click away, and a per-key confidence heat map on the Progress page.
+Your first workout needs no sign-up.
 
 ```text
 Weekly goal examples:
@@ -268,7 +269,7 @@ Developer extras once letters are solid:
 ## Further reading
 
 - [TypeFit](https://type.fit/) — ten-minute workouts, stop-on-error,
-  on-screen hands, per-key analytics; free to start in the browser
+  on-screen hands, per-key analytics; free, no ads, in the browser
 - [TypeFit courses](https://type.fit/learn) — Foundations, Speed and
   Accuracy Booster, Professional Mastery
 - [The New TypeFit: metrics that coach you](https://type.fit/blog/the-new-typefit-interface-and-metrics)
