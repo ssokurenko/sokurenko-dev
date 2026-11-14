@@ -32,6 +32,9 @@ cheatsheet:
     - aws/aws-dynamodb
     - tooling/github-actions
     - tooling/docker
+  video:
+    youtube: oEts4ArdSYg
+    title: "AWS Emulator Explained: Test Against AWS Locally (Setup, Gotchas & Limits)"
 ---
 
 ## Mental model

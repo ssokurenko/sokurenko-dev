@@ -24,7 +24,6 @@ cheatsheet:
   video:
     youtube: tcUBahvsf7Y
     title: "API Design Explained: 20 Concepts Every Developer Must Know"
-    duration: "4:31"
 ---
 
 ## Mental model

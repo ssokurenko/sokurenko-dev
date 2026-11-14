@@ -173,8 +173,7 @@ cheatsheet:
   related: [languages/javascript]
   video:                    # optional — only if a companion video exists
     youtube: tcUBahvsf7Y    # ID or any YouTube URL
-    title: Short human title, ≤ 100 chars
-    duration: "4:31"        # as YouTube shows it
+    title: Short human title # optional, ≤ 100 chars; defaults to the sheet title
 ---
 ```
 
@@ -185,7 +184,7 @@ Two fields deserve care:
 
 And one optional field:
 
-- **`video` is a companion, never a source.** Add it only when a video covers the sheet's own scope — the page shows it as a click-to-play card under the title, the PDF says "Video walkthrough (5 min) — scan the code to watch." Don't list it in `verifiedAgainst` (primary sources only), and adding one is not a reason to touch `lastVerified`. Write `title` yourself — YouTube's titles are tuned for search and run long. Never put a video in the Markdown body. Run `npm run verify:videos` to confirm it is public and embeddable.
+- **`video` is a companion, never a source.** Add it only when a video covers the sheet's own scope — the page shows it as a click-to-play card under the title, the PDF says "Video walkthrough — scan the code to watch." Don't list it in `verifiedAgainst` (primary sources only), and adding one is not a reason to touch `lastVerified`. `title` is optional and falls back to the sheet's `title`; if you set it, write it yourself — YouTube's titles are tuned for search and run long. There is no duration field — don't add one. Never put a video in the Markdown body. Run `npm run verify:videos` to confirm it is public and embeddable.
 
 ## Verification
 

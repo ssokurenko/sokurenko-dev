@@ -31,6 +31,9 @@ cheatsheet:
   difficulty: intermediate
   tags: [kiro, ai, agents, specs, ears, steering]
   related: [practices/ai-coding-agents, tooling/claude-code]
+  video:
+    youtube: BjxP61x2AkM
+    title: "Kiro Specs Explained: Spec-Driven Development from Prompt to Merged Code"
 ---
 
 ## Mental model

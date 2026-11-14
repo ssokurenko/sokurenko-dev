@@ -23,7 +23,6 @@ import {
   hasTopicVersion,
   isStale,
   formatVerificationAge,
-  formatVideoDuration,
   VIDEO_LABEL,
 } from '../../src/config/cheatsheet-schema.ts';
 
@@ -131,7 +130,7 @@ async function main() {
     // that hosts it — so the front matter says so in one line rather than
     // adding a second code that readers would have to tell apart.
     const videoLine = cs.video
-      ? `${VIDEO_LABEL} (${formatVideoDuration(cs.video.duration)}) — scan the code to watch.`
+      ? `${VIDEO_LABEL} — scan the code to watch.`
       : '';
 
     for (const format of FORMATS) {

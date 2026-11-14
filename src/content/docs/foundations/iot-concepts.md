@@ -31,7 +31,6 @@ cheatsheet:
   video:
     youtube: JjkEENr1AyA
     title: "IoT Concepts in 4 Minutes — Constraints, Protocols, Security & OTA Updates"
-    duration: "4:09"
 ---
 
 ## Mental model

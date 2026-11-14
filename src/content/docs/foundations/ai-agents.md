@@ -27,6 +27,9 @@ cheatsheet:
     - frontend/ai-sdk
     - practices/owasp-llm-agentic
     - practices/ai-coding-agents
+  video:
+    youtube: vE5YTRikc4A
+    title: "AI Agents Explained: The Agent Loop, Tool Design, Context Engineering & Evals"
 ---
 
 ## Mental model

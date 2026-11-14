@@ -33,7 +33,6 @@ cheatsheet:
   video:
     youtube: qH1f2PkNQHk
     title: "PostgreSQL Explained: 3 Facts Behind Every Surprise (Indexes, Vacuum, Locks)"
-    duration: "2:24"
 ---
 
 ## Mental model

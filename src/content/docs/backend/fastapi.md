@@ -21,7 +21,6 @@ cheatsheet:
   video:
     youtube: AaYJwgaKTI8
     title: "FastAPI in 4 Minutes — Routing, Pydantic, Depends, CORS and Testing"
-    duration: "3:45"
 ---
 
 ## Mental model

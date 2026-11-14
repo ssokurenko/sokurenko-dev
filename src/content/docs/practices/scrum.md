@@ -17,7 +17,6 @@ cheatsheet:
   video:
     youtube: vezgpwU3lss
     title: "Scrum Explained: Run Sprints That Actually Change Decisions"
-    duration: "4:22"
 ---
 
 ## Mental model

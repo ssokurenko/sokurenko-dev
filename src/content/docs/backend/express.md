@@ -18,7 +18,6 @@ cheatsheet:
   video:
     youtube: 8dA5i7em64w
     title: "Express.js in 3 Minutes - Setup, Routing, Middleware, Errors and TypeScript"
-    duration: "2:52"
 ---
 
 ## Mental model

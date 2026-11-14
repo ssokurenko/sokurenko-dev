@@ -2,8 +2,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
   cheatsheetSchema,
   parseYouTubeId,
-  formatVideoDuration,
-  videoMinutes,
+  videoTitle,
   isStale,
   hasTopicVersion,
   formatVerificationAge,
@@ -110,19 +109,6 @@ describe('isStale', () => {
   });
 });
 
-describe('formatVideoDuration', () => {
-  it.each([
-    ['0:20', 1, '1 min'],
-    ['0:40', 1, '1 min'],
-    ['4:31', 5, '5 min'],
-    ['12:05', 12, '12 min'],
-    ['1:02:03', 62, '62 min'],
-  ])('%s → %s', (duration, minutes, label) => {
-    expect(videoMinutes(duration)).toBe(minutes);
-    expect(formatVideoDuration(duration)).toBe(label);
-  });
-});
-
 describe('formatVerificationAge', () => {
   it.each([
     [0, '0 days'],
@@ -161,24 +147,34 @@ describe('cheatsheet.video schema', () => {
   });
 
   it('normalizes a pasted URL to the bare ID', () => {
-    const result = parse({ youtube: `https://youtu.be/${ID}?si=x`, title: 'API Design', duration: '4:31' });
+    const result = parse({ youtube: `https://youtu.be/${ID}?si=x`, title: 'API Design' });
     expect(result.success).toBe(true);
     expect(result.data?.cheatsheet?.video?.youtube).toBe(ID);
   });
 
   it('rejects a non-YouTube value', () => {
-    const result = parse({ youtube: 'https://vimeo.com/123', title: 'API Design', duration: '4:31' });
+    const result = parse({ youtube: 'https://vimeo.com/123', title: 'API Design' });
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].path).toEqual(['cheatsheet', 'video', 'youtube']);
   });
 
-  it('requires a title', () => {
-    expect(parse({ youtube: ID, duration: '4:31' }).success).toBe(false);
-    expect(parse({ youtube: ID, title: '', duration: '4:31' }).success).toBe(false);
-    expect(parse({ youtube: ID, title: 'x'.repeat(101), duration: '4:31' }).success).toBe(false);
+  it('makes the title optional, but bounded when given', () => {
+    expect(parse({ youtube: ID }).success).toBe(true);
+    expect(parse({ youtube: ID, title: '' }).success).toBe(false);
+    expect(parse({ youtube: ID, title: 'x'.repeat(101) }).success).toBe(false);
   });
 
-  it.each(['4:3', '4:61', '271', 'PT4M31S', '1:2:03', ''])('rejects duration %j', (duration) => {
-    expect(parse({ youtube: ID, title: 'API Design', duration }).success).toBe(false);
+  it('rejects the retired duration field', () => {
+    expect(parse({ youtube: ID, title: 'API Design', duration: '4:31' }).success).toBe(false);
+  });
+});
+
+describe('videoTitle', () => {
+  it('uses the authored title when present', () => {
+    expect(videoTitle({ youtube: ID, title: 'API Design' }, 'API Concepts')).toBe('API Design');
+  });
+
+  it('falls back to the sheet title', () => {
+    expect(videoTitle({ youtube: ID }, 'API Concepts')).toBe('API Concepts');
   });
 });

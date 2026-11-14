@@ -7,24 +7,21 @@
 // on load, and the YouTube player alone is ~1 MB of script and a cookie
 // jar. Without JS the card is still a plain link to the video.
 import { getImage } from 'astro:assets';
-import {
-  VIDEO_LABEL,
-  formatVideoDuration,
-  videoMinutes,
-  type CheatsheetVideo,
-} from '../config/cheatsheet-schema';
+import { VIDEO_LABEL, videoTitle, type CheatsheetVideo } from '../config/cheatsheet-schema';
 
 interface Props {
   video: CheatsheetVideo;
+  /** The sheet's own title — the fallback when the video has none. */
+  sheetTitle: string;
 }
-const { video } = Astro.props;
-const { youtube: id, title } = video;
+const { video, sheetTitle } = Astro.props;
+const id = video.youtube;
+const title = videoTitle(video, sheetTitle);
 
 const watchUrl = `https://www.youtube.com/watch?v=${id}`;
-const minutes = videoMinutes(video.duration);
-// aria-label replaces the card's text wholesale, so it carries everything
-// the eyebrow says: what pressing does, what plays, and for how long.
-const ariaLabel = `Play video: ${title} (${minutes} ${minutes === 1 ? 'minute' : 'minutes'})`;
+// aria-label replaces the card's text wholesale, so it carries what
+// pressing does and what plays.
+const ariaLabel = `Play video: ${title}`;
 
 // Fetched and re-encoded at build time (image.domains in astro.config.mjs),
 // so the browser only ever asks this origin for it. `maxresdefault` is the
@@ -83,7 +80,7 @@ if (!thumbnail) {
 		</span>
 		<span class="sheet-video-text">
 			<span class="sheet-video-eyebrow">
-				{VIDEO_LABEL} · {formatVideoDuration(video.duration)}<span class="sheet-video-provider"
+				{VIDEO_LABEL}<span class="sheet-video-provider"
 					>{' · YouTube'}</span
 				>
 			</span>

@@ -38,7 +38,6 @@ cheatsheet:
   video:
     youtube: 8NZAiywKnZo
     title: "pytest in 4 Minutes: Fixtures, Parametrize, Markers & Config"
-    duration: "4:27"
 ---
 
 ## Mental model

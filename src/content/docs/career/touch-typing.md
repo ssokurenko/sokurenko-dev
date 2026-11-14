@@ -34,6 +34,9 @@ cheatsheet:
     - career/sustainable-pace
     - career/second-brain
     - tooling/shell
+  video:
+    youtube: v9uF2zu-x_c
+    title: "Learn Touch Typing: 97% Accuracy, Ten Minutes a Day"
 ---
 
 ## Mental model
