@@ -26,7 +26,6 @@ cheatsheet:
   video:
     youtube: iX7wzYafNVs
     title: "Message Queues Explained: Acks, Retries, Dead Letters, Ordering & Kafka vs SQS"
-    duration: "3:35"
 ---
 
 ## Mental model

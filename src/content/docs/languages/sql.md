@@ -24,7 +24,6 @@ cheatsheet:
   video:
     youtube: s5LVORAKxzY
     title: "SQL in 4 Minutes: Joins, GROUP BY, Window Functions & Transactions"
-    duration: "3:57"
 ---
 
 ## Mental model

@@ -34,7 +34,6 @@ cheatsheet:
   video:
     youtube: g1eMjhZaqa8
     title: "LLM APIs for Web Developers: Everything You Need to Build AI Features Right"
-    duration: "3:51"
 ---
 
 ## Mental model

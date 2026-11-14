@@ -31,7 +31,6 @@ cheatsheet:
   video:
     youtube: -pE_UR2JHgQ
     title: "The Lean Startup in 5 Minutes — MVP, Build-Measure-Learn, Pivots & Actionable Metrics"
-    duration: "4:49"
 ---
 
 ## Mental model

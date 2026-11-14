@@ -46,14 +46,17 @@ const videoSchema = z.object({
     .string()
     .refine((v) => parseYouTubeId(v) !== null, 'youtube must be a video ID or a YouTube video URL')
     .transform((v) => parseYouTubeId(v)!),
+  // Optional: a sheet's video covers the sheet's own scope, so the sheet
+  // title is a fair name for it — see videoTitle.
   title: z
     .string()
     .min(1)
-    .max(MAX_VIDEO_TITLE_LENGTH, `video title must be ≤ ${MAX_VIDEO_TITLE_LENGTH} characters`),
-  duration: z
-    .string()
-    .regex(/^(?:\d+:[0-5]\d|\d{1,2}):[0-5]\d$/, 'duration must be m:ss or h:mm:ss, as YouTube shows it'),
-});
+    .max(MAX_VIDEO_TITLE_LENGTH, `video title must be ≤ ${MAX_VIDEO_TITLE_LENGTH} characters`)
+    .optional(),
+})
+  // Strict so a leftover field (the retired `duration`) fails the build
+  // instead of being silently dropped.
+  .strict();
 
 /**
  * Frontmatter contract for a cheat sheet. See
@@ -105,16 +108,11 @@ export type CheatsheetVideo = z.infer<typeof videoSchema>;
 export const VIDEO_LABEL = 'Video walkthrough';
 
 /**
- * Whole minutes, never less than one. A reader deciding whether to press
- * play wants "5 min", not "4:31" — the exact length is YouTube's to show.
+ * The name the card shows for a video: its authored `title`, else the
+ * sheet's own title (the page `title` frontmatter).
  */
-export function videoMinutes(duration: string): number {
-  const seconds = duration.split(':').reduce((total, part) => total * 60 + Number(part), 0);
-  return Math.max(1, Math.round(seconds / 60));
-}
-
-export function formatVideoDuration(duration: string): string {
-  return `${videoMinutes(duration)} min`;
+export function videoTitle(video: CheatsheetVideo, sheetTitle: string): string {
+  return video.title ?? sheetTitle;
 }
 
 export function isStale(lastVerified: Date): boolean {

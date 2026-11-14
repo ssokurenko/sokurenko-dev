@@ -20,7 +20,6 @@ cheatsheet:
   video:
     youtube: jVeMVYJtido
     title: "The Ultimate Markdown Guide for Writing Docs - Everything You Need in 5 Minutes"
-    duration: "4:38"
 ---
 
 ## Mental model

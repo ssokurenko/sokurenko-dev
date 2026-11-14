@@ -16,7 +16,6 @@ cheatsheet:
   video:
     youtube: H0deZkuVEnc
     title: "GitHub Actions Explained: Workflows, Triggers, Jobs, Matrix & Secrets"
-    duration: "3:18"
 ---
 
 ## Mental model

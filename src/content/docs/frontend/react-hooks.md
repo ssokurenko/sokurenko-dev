@@ -32,7 +32,6 @@ cheatsheet:
   video:
     youtube: UYNikQcyJfs
     title: "React Hooks Explained: Every Hook in React 19, When to Use It, and the One Mistake to Avoid"
-    duration: "4:39"
 ---
 
 ## Mental model

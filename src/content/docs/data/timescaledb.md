@@ -38,6 +38,9 @@ cheatsheet:
     - backend/mqtt
     - foundations/iot-concepts
     - foundations/data-analytics
+  video:
+    youtube: 8KefNgbsaFE
+    title: "TimescaleDB for Telemetry: Hypertables, Continuous Aggregates & Retention"
 ---
 
 ## Mental model

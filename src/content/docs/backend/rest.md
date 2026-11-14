@@ -15,7 +15,6 @@ cheatsheet:
   video:
     youtube: BzpcPezUFQw
     title: "REST API Design: Everything You Need to Build APIs Clients Can Trust"
-    duration: "3:00"
 ---
 
 ## Mental model
