@@ -29,6 +29,8 @@ cheatsheet:
     - practices/owasp-top-10
     - data/postgresql
     - tooling/claude-code
+    - foundations/rag-retrieval
+    - foundations/rag-evals
   video:
     youtube: g1eMjhZaqa8
     title: "LLM APIs for Web Developers: Everything You Need to Build AI Features Right"
