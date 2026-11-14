@@ -39,7 +39,10 @@ const processor = unified().use(remarkParse).use(remarkGfm);
 // every entry is a sheet nothing mechanically checks.
 const ENGINE_SPECIFIC = new Set([
   'data/postgresql.md',
+  'data/postgresql-indexing.md',
+  'data/postgresql-migrations.md',
   'data/pgvector.md',
+  'foundations/rag-retrieval.md',
   'data/timescaledb.md',
   // AWS IoT rules SQL: topic filters in FROM, IoT functions.
   'aws/aws-iot-core.md',
@@ -56,6 +59,10 @@ const FIXTURE_SQL = `
   -- Deduplication ledger for the idempotent-consumer example in
   -- foundations/queuing-systems.
   CREATE TABLE processed (job_id TEXT PRIMARY KEY);
+  -- Daily series for languages/sql-window-functions. Two north rows
+  -- share a day on purpose: they show the default-frame peer trap.
+  CREATE TABLE revenue (day TEXT, region TEXT, amount REAL);
+  CREATE TABLE prices (day TEXT, price REAL);
   INSERT INTO customers VALUES (1, 'Alice'), (2, 'Bob');
   INSERT INTO orders VALUES (1, 1, 150), (2, 1, 40), (3, 2, 200);
   INSERT INTO employees VALUES
@@ -63,6 +70,16 @@ const FIXTURE_SQL = `
     ('Bob', 'Eng', 95000),
     ('Carol', 'Eng', 90000);
   INSERT INTO accounts VALUES (1, 500), (2, 300);
+  INSERT INTO revenue VALUES
+    ('2026-01-01', 'north', 100),
+    ('2026-01-02', 'north', 50),
+    ('2026-01-02', 'north', 30),
+    ('2026-01-03', 'north', 200),
+    ('2026-01-01', 'south', 80);
+  INSERT INTO prices VALUES
+    ('2026-01-01', 10),
+    ('2026-01-02', 12),
+    ('2026-01-04', 11);
 `;
 
 interface Sample {

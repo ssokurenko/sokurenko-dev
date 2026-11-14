@@ -28,6 +28,8 @@ cheatsheet:
   tags: [postgresql, database, indexes, performance, transactions]
   related:
     - languages/sql
+    - data/postgresql-indexing
+    - data/postgresql-migrations
   video:
     youtube: qH1f2PkNQHk
     title: "PostgreSQL Explained: 3 Facts Behind Every Surprise (Indexes, Vacuum, Locks)"

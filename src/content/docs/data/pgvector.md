@@ -26,6 +26,7 @@ cheatsheet:
     - data/postgresql
     - foundations/ai-ml
     - foundations/ai-agents
+    - foundations/rag-retrieval
     - data/drizzle
 ---
 
